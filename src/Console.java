@@ -9,21 +9,21 @@ import java.util.regex.Pattern;
 
 public class Console {
 	private static Scanner in;
-	
+
 	public static void main(String[] args) {
 		in = new Scanner (System.in);
-		
+
 		Lexer lexer = new Lexer();
 		Parser parser = new Parser();
-		
+
 		String input = cleanConsoleInput();  // see comment
-		
+
 		while (! input.equalsIgnoreCase("exit")) {
-			
+
 			ArrayList<String> tokens = lexer.tokenize(input);
 
 			String output = "";
-			
+
 			try {
 				Expression exp = parser.parse(tokens);
 				output = exp.toString();
@@ -32,37 +32,41 @@ public class Console {
 				input = cleanConsoleInput();
 				continue;
 			}
-			
-			System.out.println(output);
-			
+
+
+			System.out.print(output);
+			if (!output.equals("")){
+				System.out.println();
+			}
+
 			input = cleanConsoleInput();
 		}
 		System.out.println("Goodbye!");
 	}
 
-	
-	
+
+
 	/*
 	 * Collects user input, and ...
-	 * ... does a bit of raw string processing to (1) strip away comments,  
+	 * ... does a bit of raw string processing to (1) strip away comments,
 	 * (2) remove the BOM character that appears in unicode strings in Windows,
 	 * (3) turn all weird whitespace characters into spaces,
 	 * and (4) replace all λs with backslashes.
 	 */
-	
+
 	private static String cleanConsoleInput() {
 		System.out.print("> ");
 		String raw = in.nextLine();
 		String deBOMified = raw.replaceAll("\uFEFF", ""); // remove Byte Order Marker from UTF
 
 		String clean = removeWeirdWhitespace(deBOMified);
-		
+
 		return clean.replaceAll("λ", "\\\\");
 	}
-	
-	
+
+
 	public static String removeWeirdWhitespace(String input) {
-		String whitespace_chars = 
+		String whitespace_chars =
 				""           // dummy empty string for homogeneity
 				+ "\\u0009"  // CHARACTER TABULATION
 				+ "\\u000A"  // LINE FEED (LF)
@@ -70,12 +74,12 @@ public class Console {
 				+ "\\u000C"  // FORM FEED (FF)
 				+ "\\u000D"  // CARRIAGE RETURN (CR)
 				+ "\\u0020"  // SPACE
-				+ "\\u0085"  // NEXT LINE (NEL) 
+				+ "\\u0085"  // NEXT LINE (NEL)
 				+ "\\u00A0"  // NO-BREAK SPACE
 				+ "\\u1680"  // OGHAM SPACE MARK
 				+ "\\u180E"  // MONGOLIAN VOWEL SEPARATOR
-				+ "\\u2000"  // EN QUAD 
-				+ "\\u2001"  // EM QUAD 
+				+ "\\u2000"  // EN QUAD
+				+ "\\u2001"  // EM QUAD
 				+ "\\u2002"  // EN SPACE
 				+ "\\u2003"  // EM SPACE
 				+ "\\u2004"  // THREE-PER-EM SPACE
@@ -89,7 +93,7 @@ public class Console {
 				+ "\\u2029"  // PARAGRAPH SEPARATOR
 				+ "\\u202F"  // NARROW NO-BREAK SPACE
 				+ "\\u205F"  // MEDIUM MATHEMATICAL SPACE
-				+ "\\u3000"; // IDEOGRAPHIC SPACE 
+				+ "\\u3000"; // IDEOGRAPHIC SPACE
 		Pattern whitespace = Pattern.compile(whitespace_chars);
 		Matcher matcher = whitespace.matcher(input);
 		String result = input;
