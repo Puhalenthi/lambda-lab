@@ -4,27 +4,44 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Stack;
 
+import src.Variables.BoundVariable;
 import src.Variables.FreeVariable;
 import src.Variables.ParameterVariable;
 import src.Variables.Variable;
 
 public class Parser {
 
+	ArrayList<ParameterVariable> debugParameterList = new ArrayList<>();
 	/*
 	 * Turns a set of tokens into an expression.  Comment this back in when you're ready.
 	 */
 	public Expression parse(ArrayList<String> tokens) throws ParseException {
+		//debugParameterList.clear();
 		preparse(tokens);
+
+		//setting an expression
+		if (tokens.size()>2 && tokens.get(1).equals("=")){
+			try {
+				Expression expression = Memory.addToMemory(tokens.get(0), recursiveParse(new ArrayList<String>(tokens.subList(2, tokens.size())), null));
+				System.out.println("Added " + expression + " as " + tokens.get(0));
+				return null;
+			} catch (DuplicateKeyException e) {
+				System.out.println(e.getMessage());
+				return null;
+			}
+		}
 
 		Expression expression = recursiveParse(tokens, null);
 
-		Variable var = new FreeVariable(tokens.get(0));
+		//debugParameterPrint();
+		
+		
 
 		// This is nonsense code, just to show you how to thrown an Exception.
 		// To throw it, type "error" at the console.
-		if (var.toString().equals("error")) {
-			throw new ParseException("User typed \"Error\" as the input!", 0);
-		}
+		// if (var.toString().equals("error")) {
+		// 	throw new ParseException("User typed \"Error\" as the input!", 0);
+		// }
 
 		return expression;
 	}
@@ -61,17 +78,22 @@ public class Parser {
 		//the tokens describe a function
 		if (tokens.get(0).equals("\\")){
 			ParameterVariable parameterVariable = new ParameterVariable(tokens.get(1));
+			//debugParameterList.add(parameterVariable);
 			ArrayList<ParameterVariable> newParameterList = addOrUpdateParameterList(parameters, parameterVariable);
 			return new Function(parameterVariable, recursiveParse(new ArrayList<String>(tokens.subList(3, tokens.size())), newParameterList));
 		}
 
 		ArrayList<ArrayList<String>> topLevelItems = separateTopLevelItems(tokens);
 
-		//the tokens describe a free variable
+		//the tokens describe a single variable
 		if (topLevelItems.size() == 1 && topLevelItems.get(0).size() == 1){
 			ParameterVariable matchingParameter = getMatchingParameter(parameters, topLevelItems.get(0).get(0));
 			if (matchingParameter == null){
-				return new FreeVariable(topLevelItems.get(0).get(0));
+				try{
+					return Memory.getFromMemory(topLevelItems.get(0).get(0));
+				} catch (IllegalArgumentException e){
+					return new FreeVariable(topLevelItems.get(0).get(0));
+				}
 			} else {
 				return matchingParameter.addBoundedVariable(topLevelItems.get(0).get(0));
 			}
@@ -151,5 +173,18 @@ public class Parser {
 			}
 		}
 		return null;
+	}
+
+	private void debugParameterPrint(){
+		System.out.println(debugParameterList.size());
+		if (debugParameterList.size() == 0) {
+			System.out.println("parser.debugParameterList: no parameters found");
+			return;
+		}
+		 
+		for (ParameterVariable p: debugParameterList){
+			System.out.print(p.getName() + ": ");
+			System.out.println(p.getBoundVariables());
+		}
 	}
 }

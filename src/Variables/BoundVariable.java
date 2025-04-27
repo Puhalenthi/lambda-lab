@@ -9,7 +9,7 @@ public class BoundVariable extends Variable {
         this.name = name;
     }
 
-    public String toString(){
-        return "B:" + this.name;
-    }
+    // public String toString(){
+    //     return "B:" + this.name;
+    // }
 }

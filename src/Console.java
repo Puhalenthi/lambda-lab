@@ -27,7 +27,9 @@ public class Console {
 
 				try {
 					Expression exp = parser.parse(tokens);
-					output = exp.toString();
+					if (exp!=null){
+						output = exp.toString();
+					}
 				} catch (Exception e) {
 					System.out.println(e);
 					System.out.println("Unparsable expression, input was: \"" + input + "\"");
