@@ -16,22 +16,26 @@ public class Console {
 		Lexer lexer = new Lexer();
 		Parser parser = new Parser();
 
-		String input = cleanConsoleInput();  // see comment
+		String input = cleanConsoleInput().trim();  // see comment
 
 		while (! input.equalsIgnoreCase("exit")) {
-
-			ArrayList<String> tokens = lexer.tokenize(input);
-
 			String output = "";
 
-			try {
-				Expression exp = parser.parse(tokens);
-				output = exp.toString();
-			} catch (Exception e) {
-				System.out.println("Unparsable expression, input was: \"" + input + "\"");
-				input = cleanConsoleInput();
-				continue;
+
+			if (!input.equals("")){
+				ArrayList<String> tokens = lexer.tokenize(input);
+
+				try {
+					Expression exp = parser.parse(tokens);
+					output = exp.toString();
+				} catch (Exception e) {
+					System.out.println(e);
+					System.out.println("Unparsable expression, input was: \"" + input + "\"");
+					input = cleanConsoleInput().trim();
+					continue;
+				}
 			}
+
 
 
 			System.out.print(output);
@@ -39,7 +43,7 @@ public class Console {
 				System.out.println();
 			}
 
-			input = cleanConsoleInput();
+			input = cleanConsoleInput().trim();
 		}
 		System.out.println("Goodbye!");
 	}

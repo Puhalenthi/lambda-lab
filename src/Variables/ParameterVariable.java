@@ -2,10 +2,20 @@ package src.Variables;
 
 import java.util.ArrayList;
 
-public class ParameterVariable extends Variable{
-    ArrayList<BoundVariable> boundedVariables = new ArrayList<>();
+public class ParameterVariable extends Variable {
+  ArrayList<BoundVariable> boundedVariables = new ArrayList<>();
 
-    public ParameterVariable(String name) {
-		this.name = name;
-	}
+  public ParameterVariable(String name) {
+    this.name = name;
+  }
+
+  public BoundVariable addBoundedVariable(String token) {
+    BoundVariable newBoundVariable = new BoundVariable(token);
+    boundedVariables.add(newBoundVariable);
+    return newBoundVariable;
+  }
+
+  public String toString(){
+    return "P:"+this.name;
+  }
 }

@@ -13,6 +13,6 @@ public class Function implements Expression {
     }
 
     public String toString(){
-        return "";
+        return "(λ" + parameter + "." + expression + ")";
     }
 }
