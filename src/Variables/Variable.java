@@ -9,4 +9,8 @@ public abstract class Variable implements Expression {
 		return name;
 	}
 
+	public String getName() {
+		return name;
+	}
+
 }

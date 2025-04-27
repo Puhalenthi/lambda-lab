@@ -3,9 +3,7 @@ package src;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Stack;
-import java.util.TreeSet;
 
-import src.Variables.BoundVariable;
 import src.Variables.FreeVariable;
 import src.Variables.ParameterVariable;
 import src.Variables.Variable;
@@ -68,7 +66,7 @@ public class Parser {
 		}
 
 		ArrayList<ArrayList<String>> topLevelItems = separateTopLevelItems(tokens);
-		
+
 		//the tokens describe a free variable
 		if (topLevelItems.size() == 1 && topLevelItems.get(0).size() == 1){
 			ParameterVariable matchingParameter = getMatchingParameter(parameters, topLevelItems.get(0).get(0));
@@ -78,7 +76,7 @@ public class Parser {
 				return matchingParameter.addBoundedVariable(topLevelItems.get(0).get(0));
 			}
 		}
-		
+
 		Expression head = null;
 
 		for (int i=0; i<topLevelItems.size(); i++){
@@ -89,7 +87,7 @@ public class Parser {
 				head = new Application(head, currentExpression);
 			}
 		}
-		
+
 		return head;
 	}
 
@@ -130,14 +128,14 @@ public class Parser {
 		if (parameterList == null) {
 			parameterList = new ArrayList<>();
 		}
-		
+
 		for (int i = 0; i < parameterList.size(); i++) {
-			if (parameterList.get(i).toString().equals(newParameter.toString())) {
+			if (parameterList.get(i).getName().equals(newParameter.getName())) {
 				parameterList.set(i, newParameter);
 				return parameterList;
 			}
 		}
-		
+
 		parameterList.add(newParameter);
 		return parameterList;
 	}
@@ -148,7 +146,7 @@ public class Parser {
 		}
 
 		for (ParameterVariable p : parameterList) {
-			if (p.toString().equals(token)){
+			if (p.getName().equals(token)){
 				return p;
 			}
 		}
