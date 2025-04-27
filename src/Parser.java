@@ -3,6 +3,10 @@ package src;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Stack;
+import java.util.TreeSet;
+
+import src.Variables.FreeVariable;
+import src.Variables.Variable;
 
 public class Parser {
 
@@ -12,7 +16,9 @@ public class Parser {
 	public Expression parse(ArrayList<String> tokens) throws ParseException {
 		preparse(tokens);
 
-		Variable var = new Variable(tokens.get(0));
+
+
+		Variable var = new FreeVariable(tokens.get(0));
 
 		// This is nonsense code, just to show you how to thrown an Exception.
 		// To throw it, type "error" at the console.
