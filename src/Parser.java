@@ -4,43 +4,42 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Stack;
 
-import src.Variables.BoundVariable;
-import src.Variables.FreeVariable;
-import src.Variables.ParameterVariable;
-import src.Variables.Variable;
+import src.variables.FreeVariable;
+import src.variables.ParameterVariable;
 
 public class Parser {
 
 	ArrayList<ParameterVariable> debugParameterList = new ArrayList<>();
+
 	/*
-	 * Turns a set of tokens into an expression.  Comment this back in when you're ready.
+	 * Turns a set of tokens into an expression. Comment this back in when you're
+	 * ready.
 	 */
-	public Expression parse(ArrayList<String> tokens) throws ParseException {
-		//debugParameterList.clear();
+	public Expression parse(ArrayList<String> tokens) throws ParseException, DuplicateKeyException {
+		// debugParameterList.clear();
 		preparse(tokens);
 
-		//setting an expression
-		if (tokens.size()>2 && tokens.get(1).equals("=")){
-			try {
-				Expression expression = Memory.addToMemory(tokens.get(0), recursiveParse(new ArrayList<String>(tokens.subList(2, tokens.size())), null));
-				System.out.println("Added " + expression + " as " + tokens.get(0));
-				return null;
-			} catch (DuplicateKeyException e) {
-				System.out.println(e.getMessage());
-				return null;
-			}
+		// setting an expression
+		if (tokens.size() > 2 && tokens.get(1).equals("=")) {
+			Expression expression = Memory.add(tokens.get(0),
+					recursiveParse(new ArrayList<String>(tokens.subList(2, tokens.size())), null));
+			System.out.println("Added " + expression + " as " + tokens.get(0));
+			return null;
+		}
+
+		// running an expression
+		if (tokens.size() > 1 && tokens.get(0).equals("run")){
+			return Runner.run(recursiveParse(new ArrayList<String>(tokens.subList(1, tokens.size())), null));
 		}
 
 		Expression expression = recursiveParse(tokens, null);
 
-		//debugParameterPrint();
-		
-		
+		// debugParameterPrint();
 
 		// This is nonsense code, just to show you how to thrown an Exception.
 		// To throw it, type "error" at the console.
 		// if (var.toString().equals("error")) {
-		// 	throw new ParseException("User typed \"Error\" as the input!", 0);
+		// throw new ParseException("User typed \"Error\" as the input!", 0);
 		// }
 
 		return expression;
@@ -49,16 +48,16 @@ public class Parser {
 	private void preparse(ArrayList<String> tokens) {
 		Stack<String> parenBalancer = new Stack<>();
 
-		for (int i=0; i<tokens.size(); i++){
-			if (tokens.get(i).equals("\\") && (i<1 || !tokens.get(i-1).equals("("))){
+		for (int i = 0; i < tokens.size(); i++) {
+			if (tokens.get(i).equals("\\") && (i < 1 || !tokens.get(i - 1).equals("("))) {
 				tokens.add(i, "(");
 				parenBalancer.add("a");
 				i++;
-			} else if (tokens.get(i).equals("(")){
+			} else if (tokens.get(i).equals("(")) {
 				parenBalancer.add("(");
-			} else if (tokens.get(i).equals(")") && parenBalancer.peek().equals("(")){
+			} else if (tokens.get(i).equals(")") && parenBalancer.peek().equals("(")) {
 				parenBalancer.pop();
-			} else if (tokens.get(i).equals(")") && parenBalancer.peek().equals("a")){
+			} else if (tokens.get(i).equals(")") && parenBalancer.peek().equals("a")) {
 				tokens.add(i, ")");
 				parenBalancer.pop();
 				parenBalancer.pop();
@@ -66,33 +65,34 @@ public class Parser {
 			}
 		}
 
-		while (!parenBalancer.isEmpty()){
+		while (!parenBalancer.isEmpty()) {
 			tokens.add(")");
 			parenBalancer.pop();
 		}
 	}
 
+	private Expression recursiveParse(ArrayList<String> tokens, ArrayList<ParameterVariable> parameters) {
 
-	private Expression recursiveParse(ArrayList<String> tokens, ArrayList<ParameterVariable> parameters){
-
-		//the tokens describe a function
-		if (tokens.get(0).equals("\\")){
+		// the tokens describe a function
+		if (tokens.get(0).equals("\\")) {
 			ParameterVariable parameterVariable = new ParameterVariable(tokens.get(1));
-			//debugParameterList.add(parameterVariable);
+			// debugParameterList.add(parameterVariable);
 			ArrayList<ParameterVariable> newParameterList = addOrUpdateParameterList(parameters, parameterVariable);
-			return new Function(parameterVariable, recursiveParse(new ArrayList<String>(tokens.subList(3, tokens.size())), newParameterList));
+			return new Function(parameterVariable,
+					recursiveParse(new ArrayList<String>(tokens.subList(3, tokens.size())), newParameterList));
 		}
 
 		ArrayList<ArrayList<String>> topLevelItems = separateTopLevelItems(tokens);
 
-		//the tokens describe a single variable
-		if (topLevelItems.size() == 1 && topLevelItems.get(0).size() == 1){
+		// the tokens describe a single variable
+		if (topLevelItems.size() == 1 && topLevelItems.get(0).size() == 1) {
 			ParameterVariable matchingParameter = getMatchingParameter(parameters, topLevelItems.get(0).get(0));
-			if (matchingParameter == null){
-				try{
-					return Memory.getFromMemory(topLevelItems.get(0).get(0));
-				} catch (IllegalArgumentException e){
+			if (matchingParameter == null) {
+				Expression memoryItem = Memory.get(topLevelItems.get(0).get(0));
+				if (memoryItem==null){
 					return new FreeVariable(topLevelItems.get(0).get(0));
+				} else {
+					return memoryItem;
 				}
 			} else {
 				return matchingParameter.addBoundedVariable(topLevelItems.get(0).get(0));
@@ -101,12 +101,18 @@ public class Parser {
 
 		Expression head = null;
 
-		for (int i=0; i<topLevelItems.size(); i++){
+		for (int i = 0; i < topLevelItems.size(); i++) {
 			Expression currentExpression = recursiveParse(topLevelItems.get(i), parameters);
-			if (head == null){
+			if (head == null) {
 				head = currentExpression;
 			} else {
-				head = new Application(head, currentExpression);
+				if (head instanceof Application){
+					((Application)head).parent = new Application(head, currentExpression);
+					head = ((Application)head).parent;
+				} else {
+					head = new Application(head, currentExpression);
+				}
+
 			}
 		}
 
@@ -119,21 +125,19 @@ public class Parser {
 		ArrayList<String> currentItem = new ArrayList<>();
 		int openingParenCount = 0;
 
-
-		for (int i=0; i<tokens.size(); i++){
+		for (int i = 0; i < tokens.size(); i++) {
 			String token = tokens.get(i);
 
-
-			//currently inside a top level item
-			if (openingParenCount != 0 && (!token.equals(")") || openingParenCount > 1)){
+			// currently inside a top level item
+			if (openingParenCount != 0 && (!token.equals(")") || openingParenCount > 1)) {
 				currentItem.add(token);
 			}
 
 			if (token.equals("(")) {
 				openingParenCount++;
-			} else if (token.equals(")")){
+			} else if (token.equals(")")) {
 				openingParenCount--;
-				if (openingParenCount==0){
+				if (openingParenCount == 0) {
 					topLevelItems.add(currentItem);
 					currentItem = new ArrayList<>();
 				}
@@ -146,7 +150,8 @@ public class Parser {
 		return topLevelItems;
 	}
 
-	private ArrayList<ParameterVariable> addOrUpdateParameterList(ArrayList<ParameterVariable> parameterList, ParameterVariable newParameter){
+	private ArrayList<ParameterVariable> addOrUpdateParameterList(ArrayList<ParameterVariable> parameterList,
+			ParameterVariable newParameter) {
 		if (parameterList == null) {
 			parameterList = new ArrayList<>();
 		}
@@ -162,27 +167,27 @@ public class Parser {
 		return parameterList;
 	}
 
-	private ParameterVariable getMatchingParameter(ArrayList<ParameterVariable> parameterList, String token){
-		if (parameterList == null){
+	private ParameterVariable getMatchingParameter(ArrayList<ParameterVariable> parameterList, String token) {
+		if (parameterList == null) {
 			return null;
 		}
 
 		for (ParameterVariable p : parameterList) {
-			if (p.getName().equals(token)){
+			if (p.getName().equals(token)) {
 				return p;
 			}
 		}
 		return null;
 	}
 
-	private void debugParameterPrint(){
+	private void debugParameterPrint() {
 		System.out.println(debugParameterList.size());
 		if (debugParameterList.size() == 0) {
 			System.out.println("parser.debugParameterList: no parameters found");
 			return;
 		}
-		 
-		for (ParameterVariable p: debugParameterList){
+
+		for (ParameterVariable p : debugParameterList) {
 			System.out.print(p.getName() + ": ");
 			System.out.println(p.getBoundVariables());
 		}

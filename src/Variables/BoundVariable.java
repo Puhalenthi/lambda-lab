@@ -1,4 +1,4 @@
-package src.Variables;
+package src.variables;
 
 public class BoundVariable extends Variable {
     public BoundVariable(String name){

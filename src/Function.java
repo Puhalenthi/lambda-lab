@@ -1,18 +1,30 @@
 package src;
 
-import src.Variables.Variable;
+import src.variables.ParameterVariable;
 
 public class Function implements Expression {
 
-   Variable parameter;
+   ParameterVariable parameter;
    Expression expression;
 
-    public Function(Variable parameter, Expression expression){
+    public Function(ParameterVariable parameter, Expression expression){
         this.parameter = parameter;
         this.expression = expression;
     }
 
     public String toString(){
         return "(λ" + parameter + "." + expression + ")";
+    }
+
+    public ParameterVariable getParameter(){
+        return parameter;
+    }
+
+    public Expression getExpression(){
+        return expression;
+    }
+
+    public void setExpression(Expression e){
+        expression = e;
     }
 }

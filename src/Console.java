@@ -18,7 +18,7 @@ public class Console {
 
 		String input = cleanConsoleInput().trim();  // see comment
 
-		while (! input.equalsIgnoreCase("exit")) {
+		while (!input.equalsIgnoreCase("exit")) {
 			String output = "";
 
 
@@ -30,6 +30,9 @@ public class Console {
 					if (exp!=null){
 						output = exp.toString();
 					}
+				} catch (DuplicateKeyException e){
+					System.out.println(e.getMessage());
+					continue;
 				} catch (Exception e) {
 					System.out.println(e);
 					System.out.println("Unparsable expression, input was: \"" + input + "\"");

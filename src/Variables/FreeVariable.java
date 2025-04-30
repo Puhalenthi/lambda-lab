@@ -1,4 +1,4 @@
-package src.Variables;
+package src.variables;
 
 public class FreeVariable extends Variable {
     public FreeVariable(String name) {
