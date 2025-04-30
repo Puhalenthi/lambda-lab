@@ -22,7 +22,7 @@ public class Parser {
 		// setting an expression
 		if (tokens.size() > 2 && tokens.get(1).equals("=")) {
 			Expression expression = Memory.add(tokens.get(0),
-					recursiveParse(new ArrayList<String>(tokens.subList(2, tokens.size())), null));
+					parse(new ArrayList<String>(tokens.subList(2, tokens.size()))));
 			System.out.println("Added " + expression + " as " + tokens.get(0));
 			return null;
 		}
