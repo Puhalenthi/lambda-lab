@@ -42,6 +42,8 @@ public class Runner {
             leftmostApplication = findLeftmostRunnableApplication(expression);
         }
 
+       printExpressionTree(expression, "");
+
         return expression;
     }
 
@@ -121,6 +123,25 @@ public class Runner {
         } else {
             System.out.println("Huge error with deep copy");
             return null;
+        }
+    }
+
+    public static void printExpressionTree(Expression expression, String indent) {
+        if (expression instanceof Variable) {
+            System.out.println(indent + "Variable: " + expression);
+        } else if (expression instanceof Function) {
+            Function f = (Function) expression;
+            System.out.println(indent + "Function: " + f.getParameter());
+            printExpressionTree(f.getExpression(), indent + "  ");
+        } else if (expression instanceof Application) {
+            Application a = (Application) expression;
+            System.out.println(indent + "Application:");
+            System.out.println(indent + "  Left:");
+            printExpressionTree(a.left, indent + "    ");
+            System.out.println(indent + "  Right:");
+            printExpressionTree(a.right, indent + "    ");
+        } else {
+            System.out.println(indent + "Unknown Expression Type");
         }
     }
 }
