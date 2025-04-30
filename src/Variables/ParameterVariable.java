@@ -16,10 +16,15 @@ public class ParameterVariable extends Variable {
   }
 
   // public String toString(){
-  //   return "P:"+this.name;
+  // return "P:"+this.name;
   // }
 
   public ArrayList<BoundVariable> getBoundVariables() {
     return boundVariables;
+  }
+
+  public void replaceBoundVariable(BoundVariable oldVariable, BoundVariable newVariable) {
+    boundVariables.remove(oldVariable);
+    boundVariables.add(newVariable);
   }
 }
