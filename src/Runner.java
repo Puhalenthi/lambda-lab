@@ -9,15 +9,21 @@ import src.variables.Variable;
 
 public class Runner {
     public static Expression run(Expression expression) {
-
         Application leftmostApplication = findLeftmostRunnableApplication(expression);
 
         while (leftmostApplication != null) {
+            System.out.println("Leftmost: " + leftmostApplication);
+
+            // Ensure the left side is a Function
+            if (!(leftmostApplication.left instanceof Function)) {
+                throw new IllegalStateException("Left side of application is not a function.");
+            }
+
             Function leftFunction = (Function) leftmostApplication.left;
             Expression newExpression = runApplication(leftFunction.getParameter(), leftFunction.getExpression(),
                     leftmostApplication.right);
-            System.out.println("New expression: " + newExpression);
 
+            // Update the parent of the leftmost application
             if (leftmostApplication.parent instanceof Function) {
                 ((Function) leftmostApplication.parent).setExpression(newExpression);
             } else if (leftmostApplication.parent instanceof Application) {
@@ -28,8 +34,11 @@ public class Runner {
                     parent.setRight(newExpression);
                 }
             } else if (leftmostApplication.parent == null) {
-                return run(newExpression);
+                // If there's no parent, the new expression becomes the root
+                expression = newExpression;
             }
+
+            // Find the next leftmost application
             leftmostApplication = findLeftmostRunnableApplication(expression);
         }
 
