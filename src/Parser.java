@@ -28,19 +28,11 @@ public class Parser {
 		}
 
 		// running an expression
-		if (tokens.size() > 1 && tokens.get(0).equals("run")){
+		if (tokens.size() > 1 && tokens.get(0).equals("run")) {
 			return Runner.run(recursiveParse(new ArrayList<String>(tokens.subList(1, tokens.size())), null));
 		}
 
 		Expression expression = recursiveParse(tokens, null);
-
-		// debugParameterPrint();
-
-		// This is nonsense code, just to show you how to thrown an Exception.
-		// To throw it, type "error" at the console.
-		// if (var.toString().equals("error")) {
-		// throw new ParseException("User typed \"Error\" as the input!", 0);
-		// }
 
 		return expression;
 	}
@@ -78,8 +70,13 @@ public class Parser {
 			ParameterVariable parameterVariable = new ParameterVariable(tokens.get(1));
 			// debugParameterList.add(parameterVariable);
 			ArrayList<ParameterVariable> newParameterList = addOrUpdateParameterList(parameters, parameterVariable);
-			return new Function(parameterVariable,
-					recursiveParse(new ArrayList<String>(tokens.subList(3, tokens.size())), newParameterList));
+			Expression parsedExpression = recursiveParse(new ArrayList<String>(tokens.subList(3, tokens.size())),
+					newParameterList);
+			Function newFunction = new Function(parameterVariable, parsedExpression);
+			if (parsedExpression instanceof Application) {
+				((Application) parsedExpression).setParent(newFunction);
+			}
+			return newFunction;
 		}
 
 		ArrayList<ArrayList<String>> topLevelItems = separateTopLevelItems(tokens);
@@ -89,7 +86,7 @@ public class Parser {
 			ParameterVariable matchingParameter = getMatchingParameter(parameters, topLevelItems.get(0).get(0));
 			if (matchingParameter == null) {
 				Expression memoryItem = Memory.get(topLevelItems.get(0).get(0));
-				if (memoryItem==null){
+				if (memoryItem == null) {
 					return new FreeVariable(topLevelItems.get(0).get(0));
 				} else {
 					return memoryItem;
@@ -106,9 +103,13 @@ public class Parser {
 			if (head == null) {
 				head = currentExpression;
 			} else {
-				if (head instanceof Application){
-					((Application)head).parent = new Application(head, currentExpression);
-					head = ((Application)head).parent;
+				if (head instanceof Application) {
+					Application newApplication = new Application(head, currentExpression);
+					((Application) head).parent = newApplication;
+					if (currentExpression instanceof Application) {
+						((Application) currentExpression).setParent(newApplication);
+					}
+					head = ((Application) head).parent;
 				} else {
 					head = new Application(head, currentExpression);
 				}
@@ -178,18 +179,5 @@ public class Parser {
 			}
 		}
 		return null;
-	}
-
-	private void debugParameterPrint() {
-		System.out.println(debugParameterList.size());
-		if (debugParameterList.size() == 0) {
-			System.out.println("parser.debugParameterList: no parameters found");
-			return;
-		}
-
-		for (ParameterVariable p : debugParameterList) {
-			System.out.print(p.getName() + ": ");
-			System.out.println(p.getBoundVariables());
-		}
 	}
 }

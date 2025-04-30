@@ -17,7 +17,7 @@ public class Application implements Expression {
     }
 
     public String toString() {
-        return "[" + left + " " + right + "]";
+        return "(" + left + " " + right + ")";
     }
 
     public void setLeft(Expression e) {
@@ -26,5 +26,9 @@ public class Application implements Expression {
 
     public void setRight(Expression e) {
         right = e;
+    }
+
+    public void setParent(Expression e) {
+        parent = e;
     }
 }

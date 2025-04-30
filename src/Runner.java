@@ -12,7 +12,6 @@ public class Runner {
         Application leftmostApplication = findLeftmostRunnableApplication(expression);
 
         while (leftmostApplication != null) {
-            System.out.println("Leftmost: " + leftmostApplication);
 
             // Ensure the left side is a Function
             if (!(leftmostApplication.left instanceof Function)) {
@@ -26,24 +25,29 @@ public class Runner {
             // Update the parent of the leftmost application
             if (leftmostApplication.parent instanceof Function) {
                 ((Function) leftmostApplication.parent).setExpression(newExpression);
+                if (newExpression instanceof Application) {
+                    ((Application) newExpression).setParent(leftmostApplication.parent);
+                }
             } else if (leftmostApplication.parent instanceof Application) {
                 Application parent = (Application) leftmostApplication.parent;
+
                 if (parent.left == leftmostApplication) {
                     parent.setLeft(newExpression);
-                } else {
+                } else if (parent.right == leftmostApplication) {
                     parent.setRight(newExpression);
+                }
+
+                if (newExpression instanceof Application) {
+                    ((Application) newExpression).setParent(leftmostApplication.parent);
                 }
             } else if (leftmostApplication.parent == null) {
                 // If there's no parent, the new expression becomes the root
-                expression = newExpression;
+                return run(newExpression);
             }
 
             // Find the next leftmost application
             leftmostApplication = findLeftmostRunnableApplication(expression);
         }
-
-       printExpressionTree(expression, "");
-
         return expression;
     }
 
@@ -79,8 +83,6 @@ public class Runner {
     // to paramater with argument
     public static Expression runApplication(ParameterVariable parameter, Expression functionExpression,
             Expression argument) {
-        // System.out.println("Parameter: " + parameter + " Expression: " +
-        // functionExpression + " Argument: " + argument);
 
         if (functionExpression instanceof Application) {
             Application a = (Application) functionExpression;
