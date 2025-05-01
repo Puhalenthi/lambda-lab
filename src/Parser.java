@@ -16,7 +16,6 @@ public class Parser {
 	 * ready.
 	 */
 	public Expression parse(ArrayList<String> tokens) throws ParseException, DuplicateKeyException {
-		// debugParameterList.clear();
 		preparse(tokens);
 
 		// setting an expression
@@ -29,7 +28,7 @@ public class Parser {
 
 		// running an expression
 		if (tokens.size() > 1 && tokens.get(0).equals("run")) {
-			return Runner.run(recursiveParse(new ArrayList<String>(tokens.subList(1, tokens.size())), null));
+			return Runner.runWithDeepCopy(recursiveParse(new ArrayList<String>(tokens.subList(1, tokens.size())), null));
 		}
 
 		Expression expression = recursiveParse(tokens, null);
@@ -68,7 +67,6 @@ public class Parser {
 		// the tokens describe a function
 		if (tokens.get(0).equals("\\")) {
 			ParameterVariable parameterVariable = new ParameterVariable(tokens.get(1));
-			// debugParameterList.add(parameterVariable);
 			ArrayList<ParameterVariable> newParameterList = addOrUpdateParameterList(parameters, parameterVariable);
 			Expression parsedExpression = recursiveParse(new ArrayList<String>(tokens.subList(3, tokens.size())),
 					newParameterList);
@@ -111,9 +109,12 @@ public class Parser {
 					}
 					head = ((Application) head).parent;
 				} else {
-					head = new Application(head, currentExpression);
+					Application newApplication = new Application(head, currentExpression);
+					if (currentExpression instanceof Application) {
+						((Application) currentExpression).setParent(newApplication);
+					}
+					head = newApplication;
 				}
-
 			}
 		}
 

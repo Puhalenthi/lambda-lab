@@ -1,15 +1,22 @@
 package src.variables;
 
 public class BoundVariable extends Variable {
-    public BoundVariable(String name){
-		this.name = name;
-	}
+    ParameterVariable parameter;
 
-    public void setName(String name){
+    public BoundVariable(String name, ParameterVariable parameter) {
+        this.name = name;
+        this.parameter = parameter;
+    }
+
+    public void setName(String name) {
         this.name = name;
     }
 
+    public ParameterVariable getParameter() {
+        return parameter;
+    }
+
     // public String toString(){
-    //     return "B:" + this.name;
+    // return "B:" + this.name;
     // }
 }

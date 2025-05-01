@@ -10,7 +10,7 @@ public class ParameterVariable extends Variable {
   }
 
   public BoundVariable addBoundedVariable(String token) {
-    BoundVariable newBoundVariable = new BoundVariable(token);
+    BoundVariable newBoundVariable = new BoundVariable(token, this);
     boundVariables.add(newBoundVariable);
     return newBoundVariable;
   }

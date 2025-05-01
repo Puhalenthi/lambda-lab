@@ -8,6 +8,13 @@ import src.variables.ParameterVariable;
 import src.variables.Variable;
 
 public class Runner {
+    public static Expression runWithDeepCopy(Expression expression) {
+        System.out.println("Expression: " + expression);
+        expression = deepCopy(expression, new ArrayList<>());
+        System.out.println("Copied expression: " + expression);
+        return run(expression);
+    }
+
     public static Expression run(Expression expression) {
         Application leftmostApplication = findLeftmostRunnableApplication(expression);
 
@@ -20,7 +27,7 @@ public class Runner {
 
             Function leftFunction = (Function) leftmostApplication.left;
             Expression newExpression = runApplication(leftFunction.getParameter(), leftFunction.getExpression(),
-                    leftmostApplication.right);
+                    leftmostApplication.right, new ArrayList<>());
 
             // Update the parent of the leftmost application
             if (leftmostApplication.parent instanceof Function) {
@@ -52,6 +59,8 @@ public class Runner {
     }
 
     public static Application findLeftmostRunnableApplication(Expression expression) {
+        // System.out.println("Expression: " + expression + " Class: " +
+        // expression.getClass());
         if (expression instanceof Variable) {
             return null;
         } else if (expression instanceof Function) {
@@ -68,10 +77,12 @@ public class Runner {
             leftmostApplication = findLeftmostRunnableApplication(a.right);
 
             // checking the right side of the application
-            if (leftmostApplication != null || !(a.left instanceof Function)) {
+            if (leftmostApplication != null) {
                 return leftmostApplication;
-            } else {
+            } else if (a.left instanceof Function) {
                 return a;
+            } else {
+                return null;
             }
         } else {
             System.out.println("Major problem with finding leftmost application");
@@ -82,19 +93,21 @@ public class Runner {
     // recursively goes through functionExpression and replaces all variables bound
     // to paramater with argument
     public static Expression runApplication(ParameterVariable parameter, Expression functionExpression,
-            Expression argument) {
+            Expression argument, ArrayList<ParameterVariable> parameterList) {
 
         if (functionExpression instanceof Application) {
             Application a = (Application) functionExpression;
-            a.left = runApplication(parameter, a.left, argument);
-            a.right = runApplication(parameter, a.right, argument);
+            a.left = runApplication(parameter, a.left, argument, parameterList);
+            a.right = runApplication(parameter, a.right, argument, parameterList);
             return a;
         } else if (functionExpression instanceof Function) {
             Function f = (Function) functionExpression;
-            f.expression = runApplication(parameter, f.expression, argument);
+            parameterList.add(f.getParameter());
+            f.expression = runApplication(parameter, f.expression, argument, parameterList);
             return f;
         } else if (parameter.getBoundVariables().contains(functionExpression)) {
-            return deepCopy(argument, new ArrayList<>());
+            Expression deepCopy = deepCopy(argument, parameterList);
+            return deepCopy;
         } else if (functionExpression instanceof Variable) {
             return functionExpression;
         } else {
@@ -108,12 +121,14 @@ public class Runner {
             return new FreeVariable(((FreeVariable) expression).getName());
         } else if (expression instanceof BoundVariable) {
             String variableName = ((BoundVariable) expression).getName();
-            for (ParameterVariable p : parameterList) {
-                if (p.getName().equals(variableName)) {
-                    return p.addBoundedVariable(variableName);
+
+            for (int i = parameterList.size() - 1; i >= 0; i--) {
+                if (parameterList.get(i).getName().equals(variableName)) {
+                    return parameterList.get(i).addBoundedVariable(variableName);
                 }
             }
-            return null;
+
+            return ((BoundVariable) expression).getParameter().addBoundedVariable(variableName);
         } else if (expression instanceof Function) {
             Function f = (Function) expression;
             ParameterVariable p = new ParameterVariable(f.getParameter().getName());
