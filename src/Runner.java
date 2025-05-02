@@ -9,9 +9,7 @@ import src.variables.Variable;
 
 public class Runner {
     public static Expression runWithDeepCopy(Expression expression) {
-        System.out.println("Expression: " + expression);
         expression = deepCopy(expression, new ArrayList<>(), null);
-        System.out.println("Copied expression: " + expression);
         return run(expression);
     }
 
@@ -19,6 +17,8 @@ public class Runner {
         Application leftmostApplication = findLeftmostRunnableApplication(expression);
 
         while (leftmostApplication != null) {
+            System.out.println("leftmost: " + leftmostApplication);
+
             // Ensure the left side is a Function
             if (!(leftmostApplication.left instanceof Function)) {
                 throw new IllegalStateException("Left side of application is not a function.");
@@ -27,14 +27,17 @@ public class Runner {
             Function leftFunction = (Function) leftmostApplication.left;
             Expression newExpression = runApplication(leftFunction.getParameter(), leftFunction.getExpression(),
                     leftmostApplication.right, new ArrayList<>());
+            System.out.println("new expression: " + newExpression);
 
             // Update the parent of the leftmost application
             if (leftmostApplication.parent instanceof Function) {
+                System.out.println("Function problem");
                 ((Function) leftmostApplication.parent).setExpression(newExpression);
                 if (newExpression instanceof Application) {
                     ((Application) newExpression).setParent(leftmostApplication.parent);
                 }
             } else if (leftmostApplication.parent instanceof Application) {
+                System.out.println("Parent: " + leftmostApplication.parent);
                 Application parent = (Application) leftmostApplication.parent;
 
                 if (parent.left == leftmostApplication) {
@@ -47,9 +50,15 @@ public class Runner {
                     ((Application) newExpression).setParent(leftmostApplication.parent);
                 }
             } else if (leftmostApplication.parent == null) {
+                System.out.println("Null problem");
+                if (newExpression instanceof Application) {
+                    ((Application) newExpression).setParent(null);
+                }
                 // If there's no parent, the new expression becomes the root
                 return run(newExpression);
             }
+
+            System.out.println("Expression: " + expression);
             // Find the next leftmost application
             leftmostApplication = findLeftmostRunnableApplication(expression);
         }
@@ -57,8 +66,6 @@ public class Runner {
     }
 
     public static Application findLeftmostRunnableApplication(Expression expression) {
-        // System.out.println("Expression: " + expression + " Class: " +
-        // expression.getClass());
         if (expression instanceof Variable) {
             return null;
         } else if (expression instanceof Function) {
@@ -105,6 +112,7 @@ public class Runner {
             return f;
         } else if (parameter.getBoundVariables().contains(functionExpression)) {
             Expression deepCopy = deepCopy(argument, parameterList, null);
+            //TODO: find a way to get deepCopy its parent
             return deepCopy;
         } else if (functionExpression instanceof Variable) {
             return functionExpression;

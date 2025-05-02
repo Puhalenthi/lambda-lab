@@ -16,8 +16,13 @@ public class Application implements Expression {
         this(a, b, null);
     }
 
+    // public String toString() {
+    // return "(" + left + " " + right + ")";
+    // }
+
+    // just for debugging purposes
     public String toString() {
-        return "(" + left + " " + right + ")";
+        return "[" + left + " " + right + (parent != null) + "]";
     }
 
     public void setLeft(Expression e) {
