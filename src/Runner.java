@@ -10,7 +10,7 @@ import src.variables.Variable;
 public class Runner {
     public static Expression runWithDeepCopy(Expression expression) {
         System.out.println("Expression: " + expression);
-        expression = deepCopy(expression, new ArrayList<>());
+        expression = deepCopy(expression, new ArrayList<>(), null);
         System.out.println("Copied expression: " + expression);
         return run(expression);
     }
@@ -19,7 +19,6 @@ public class Runner {
         Application leftmostApplication = findLeftmostRunnableApplication(expression);
 
         while (leftmostApplication != null) {
-
             // Ensure the left side is a Function
             if (!(leftmostApplication.left instanceof Function)) {
                 throw new IllegalStateException("Left side of application is not a function.");
@@ -51,7 +50,6 @@ public class Runner {
                 // If there's no parent, the new expression becomes the root
                 return run(newExpression);
             }
-
             // Find the next leftmost application
             leftmostApplication = findLeftmostRunnableApplication(expression);
         }
@@ -106,7 +104,7 @@ public class Runner {
             f.expression = runApplication(parameter, f.expression, argument, parameterList);
             return f;
         } else if (parameter.getBoundVariables().contains(functionExpression)) {
-            Expression deepCopy = deepCopy(argument, parameterList);
+            Expression deepCopy = deepCopy(argument, parameterList, null);
             return deepCopy;
         } else if (functionExpression instanceof Variable) {
             return functionExpression;
@@ -116,7 +114,8 @@ public class Runner {
         }
     }
 
-    public static Expression deepCopy(Expression expression, ArrayList<ParameterVariable> parameterList) {
+    public static Expression deepCopy(Expression expression, ArrayList<ParameterVariable> parameterList,
+            Expression parent) {
         if (expression instanceof FreeVariable) {
             return new FreeVariable(((FreeVariable) expression).getName());
         } else if (expression instanceof BoundVariable) {
@@ -133,10 +132,16 @@ public class Runner {
             Function f = (Function) expression;
             ParameterVariable p = new ParameterVariable(f.getParameter().getName());
             parameterList.add(p);
-            return new Function(p, deepCopy(f.getExpression(), parameterList));
+            Function newFunction = new Function(p, null);
+            newFunction.setExpression(deepCopy(f.getExpression(), parameterList, newFunction));
+            return newFunction;
+
         } else if (expression instanceof Application) {
             Application a = (Application) expression;
-            return new Application(deepCopy(a.left, parameterList), deepCopy(a.right, parameterList));
+            Application newApplication = new Application(null, null, parent);
+            newApplication.setLeft(deepCopy(a.left, parameterList, newApplication));
+            newApplication.setRight(deepCopy(a.right, parameterList, newApplication));
+            return newApplication;
         } else {
             System.out.println("Huge error with deep copy");
             return null;
