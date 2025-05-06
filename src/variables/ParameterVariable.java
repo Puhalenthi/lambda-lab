@@ -27,4 +27,11 @@ public class ParameterVariable extends Variable {
     boundVariables.remove(oldVariable);
     boundVariables.add(newVariable);
   }
+
+  public void setName(String name) {
+    for (BoundVariable bv : boundVariables) {
+      bv.setName(name);
+    }
+    this.name = name;
+  }
 }

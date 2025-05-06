@@ -10,7 +10,9 @@ import src.variables.Variable;
 public class Runner {
     public static Expression runWithDeepCopy(Expression expression) {
         expression = deepCopy(expression, new ArrayList<>(), null);
-        return run(expression);
+        Expression runExpression = run(expression);
+        performAlphaReduction(runExpression, new ArrayList<>());
+        return runExpression;
     }
 
     public static Expression run(Expression expression) {
@@ -58,7 +60,7 @@ public class Runner {
         return expression;
     }
 
-    public static Application findLeftmostRunnableApplication(Expression expression) {
+    private static Application findLeftmostRunnableApplication(Expression expression) {
         switch (expression) {
             case Variable v:
                 return null;
@@ -89,7 +91,7 @@ public class Runner {
 
     // recursively goes through functionExpression and replaces all variables bound
     // to paramater with argument
-    public static Expression runApplication(ParameterVariable parameter, Expression functionExpression,
+    private static Expression runApplication(ParameterVariable parameter, Expression functionExpression,
             Expression argument, ArrayList<ParameterVariable> parameterList, Expression parent) {
 
         switch (functionExpression) {
@@ -114,7 +116,7 @@ public class Runner {
         }
     }
 
-    public static Expression deepCopy(Expression expression, ArrayList<ParameterVariable> parameterList,
+    private static Expression deepCopy(Expression expression, ArrayList<ParameterVariable> parameterList,
             Expression parent) {
 
         switch (expression) {
@@ -146,7 +148,47 @@ public class Runner {
         }
     }
 
-    public static void printExpressionTree(Expression expression, String indent) {
+    private static void performAlphaReduction(Expression expression, ArrayList<ParameterVariable> parameterList) {
+        System.out.println("nighil");
+        switch (expression) {
+            case FreeVariable fv:
+                for (ParameterVariable pv : parameterList) {
+                    if (pv.getName().equals(fv.getName())) {
+                        pv.setName(createNewParameterName(parameterList, pv));
+                    }
+                }
+                break;
+            case Function f:
+                ParameterVariable p = new ParameterVariable(f.getParameter().getName());
+                parameterList.add(p);
+                performAlphaReduction(f.getExpression(), parameterList);
+                break;
+            case Application a:
+                performAlphaReduction(a.left, parameterList);
+                performAlphaReduction(a.right, parameterList);
+            default:
+                break;
+        }
+    }
+
+    private static String createNewParameterName(ArrayList<ParameterVariable> parameterList, ParameterVariable v) {
+        String baseName = v.getName();
+        String newName = baseName;
+        boolean isNotFound = true;
+        int counter = 1;
+
+        for (int i = 0; i < newName.length(); i++) {
+            if (parameterList.get(i).getName().equals(newName)) {
+                newName = baseName + counter;
+                counter++;
+                i = -1;
+            }
+        }
+
+        return newName;
+    }
+
+    private static void printExpressionTree(Expression expression, String indent) {
         if (expression instanceof Variable) {
             System.out.println(indent + "Variable: " + expression);
         } else if (expression instanceof Function) {
