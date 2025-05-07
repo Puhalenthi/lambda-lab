@@ -34,7 +34,7 @@ public class Runner {
                 case Function f:
                     f.setExpression(newExpression);
                     break;
-                case Application a: 
+                case Application a:
                     if (a.left == leftmostApplication) {
                         a.setLeft(newExpression);
                     } else if (a.right == leftmostApplication) {
@@ -66,7 +66,7 @@ public class Runner {
                 return null;
             case Function f:
                 return findLeftmostRunnableApplication(f.expression);
-            case Application a: 
+            case Application a:
                 Application leftmostApplication = findLeftmostRunnableApplication(a.left);
 
                 // checking the left side of the application
@@ -112,7 +112,7 @@ public class Runner {
                     return deepCopy;
                 }
             default:
-                return functionExpression;    
+                return functionExpression;
         }
     }
 
@@ -149,7 +149,6 @@ public class Runner {
     }
 
     private static void performAlphaReduction(Expression expression, ArrayList<ParameterVariable> parameterList) {
-        System.out.println("nighil");
         switch (expression) {
             case FreeVariable fv:
                 for (ParameterVariable pv : parameterList) {
@@ -158,14 +157,30 @@ public class Runner {
                     }
                 }
                 break;
+            case BoundVariable bv:
+                ParameterVariable parameterToBeChanged;
+                do {
+                    parameterToBeChanged = null;
+                    for (ParameterVariable pv: parameterList){
+                        if (pv.getName().equals(bv.getName()) && !pv.getBoundVariables().contains(bv)) {
+                            parameterToBeChanged = pv;
+                            break;
+                        }
+                    }
+                    if (parameterToBeChanged != null) {
+                        parameterToBeChanged.setName(createNewParameterName(parameterList, parameterToBeChanged));
+                    }
+                } while (parameterToBeChanged != null);
+                break;
             case Function f:
-                ParameterVariable p = new ParameterVariable(f.getParameter().getName());
+                ParameterVariable p = f.getParameter();
                 parameterList.add(p);
                 performAlphaReduction(f.getExpression(), parameterList);
                 break;
             case Application a:
                 performAlphaReduction(a.left, parameterList);
                 performAlphaReduction(a.right, parameterList);
+                break;
             default:
                 break;
         }
@@ -177,7 +192,7 @@ public class Runner {
         boolean isNotFound = true;
         int counter = 1;
 
-        for (int i = 0; i < newName.length(); i++) {
+        for (int i = 0; i < parameterList.size(); i++) {
             if (parameterList.get(i).getName().equals(newName)) {
                 newName = baseName + counter;
                 counter++;

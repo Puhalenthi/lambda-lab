@@ -15,8 +15,8 @@ public class ParameterVariable extends Variable {
     return newBoundVariable;
   }
 
-  // public String toString(){
-  // return "P:"+this.name;
+  // public String toString() {
+  //   return "P:" + this.name;
   // }
 
   public ArrayList<BoundVariable> getBoundVariables() {

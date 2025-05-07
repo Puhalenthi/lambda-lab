@@ -34,9 +34,9 @@ public class Console {
 					System.out.println(e.getMessage());
 					continue;
 				} catch (Exception e) {
-					
 					System.out.println(e);
-					System.out.println("Unparsable expression, input was: \"" + input + "\"");
+					e.printStackTrace();
+					//System.out.println("Unparsable expression, input was: \"" + input + "\"");
 					input = cleanConsoleInput().trim();
 					continue;
 				}
