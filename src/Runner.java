@@ -10,6 +10,7 @@ import src.variables.Variable;
 public class Runner {
     public static Expression runWithDeepCopy(Expression expression) {
         expression = deepCopy(expression, new ArrayList<>(), null);
+        printExpressionTree(expression, "   ");
         Expression runExpression = run(expression);
         performAlphaReduction(runExpression, new ArrayList<>());
         return runExpression;
@@ -204,11 +205,14 @@ public class Runner {
     }
 
     private static void printExpressionTree(Expression expression, String indent) {
-        if (expression instanceof Variable) {
-            System.out.println(indent + "Variable: " + expression);
+        if (expression instanceof FreeVariable) {
+            System.out.println(indent + "Free Variable: " + expression);
+        } else if (expression instanceof BoundVariable){
+            System.out.println(indent + "Bound Variable: " + expression);
         } else if (expression instanceof Function) {
             Function f = (Function) expression;
             System.out.println(indent + "Function: " + f.getParameter());
+            System.out.println(indent + "Bounded Parameters: " + f.getParameter().getBoundVariables());
             printExpressionTree(f.getExpression(), indent + "  ");
         } else if (expression instanceof Application) {
             Application a = (Application) expression;

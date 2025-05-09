@@ -66,14 +66,18 @@ public class Parser {
 
 		// the tokens describe a function
 		if (tokens.get(0).equals("\\")) {
+
 			ParameterVariable parameterVariable = new ParameterVariable(tokens.get(1));
 			ArrayList<ParameterVariable> newParameterList = addOrUpdateParameterList(parameters, parameterVariable);
+
 			Expression parsedExpression = recursiveParse(new ArrayList<String>(tokens.subList(3, tokens.size())),
 					newParameterList);
 			Function newFunction = new Function(parameterVariable, parsedExpression);
-			if (parsedExpression instanceof Application) {
-				((Application) parsedExpression).setParent(newFunction);
+
+			if (parsedExpression instanceof Application parsedApplication) {
+				parsedApplication.setParent(newFunction);
 			}
+
 			return newFunction;
 		}
 
@@ -154,19 +158,33 @@ public class Parser {
 
 	private ArrayList<ParameterVariable> addOrUpdateParameterList(ArrayList<ParameterVariable> parameterList,
 			ParameterVariable newParameter) {
-		if (parameterList == null) {
-			parameterList = new ArrayList<>();
+
+		ArrayList<ParameterVariable> newParameterList = new ArrayList<>();
+		if (parameterList == null){
+			newParameterList.add(newParameter);
+			return newParameterList;
 		}
 
 		for (int i = 0; i < parameterList.size(); i++) {
-			if (parameterList.get(i).getName().equals(newParameter.getName())) {
-				parameterList.set(i, newParameter);
-				return parameterList;
-			}
+			newParameterList.add(parameterList.get(i));
 		}
+		newParameterList.add(newParameter);
 
-		parameterList.add(newParameter);
-		return parameterList;
+		return newParameterList;
+
+		// if (parameterList == null) {
+		// 	parameterList = new ArrayList<>();
+		// }
+
+		// for (int i = 0; i < parameterList.size(); i++) {
+		// 	if (parameterList.get(i).getName().equals(newParameter.getName())) {
+		// 		parameterList.set(i, newParameter);
+		// 		return parameterList;
+		// 	}
+		// }
+
+		// parameterList.add(newParameter);
+		// return parameterList;
 	}
 
 	private ParameterVariable getMatchingParameter(ArrayList<ParameterVariable> parameterList, String token) {
@@ -174,9 +192,9 @@ public class Parser {
 			return null;
 		}
 
-		for (ParameterVariable p : parameterList) {
-			if (p.getName().equals(token)) {
-				return p;
+		for (int i=parameterList.size()-1; i>=0; i--) {
+			if (parameterList.get(i).getName().equals(token)) {
+				return parameterList.get(i);
 			}
 		}
 		return null;
