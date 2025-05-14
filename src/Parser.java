@@ -28,7 +28,8 @@ public class Parser {
 
 		// running an expression
 		if (tokens.size() > 1 && tokens.get(0).equals("run")) {
-			return Runner.runWithDeepCopy(recursiveParse(new ArrayList<String>(tokens.subList(1, tokens.size())), null));
+			Expression newExpression = recursiveParse(new ArrayList<String>(tokens.subList(1, tokens.size())), null);
+			return Runner.runWithDeepCopy(newExpression);
 		}
 
 		Expression expression = recursiveParse(tokens, null);
@@ -86,36 +87,36 @@ public class Parser {
 		// the tokens describe a single variable
 		if (topLevelItems.size() == 1 && topLevelItems.get(0).size() == 1) {
 			ParameterVariable matchingParameter = getMatchingParameter(parameters, topLevelItems.get(0).get(0));
+
 			if (matchingParameter == null) {
 				Expression memoryItem = Memory.get(topLevelItems.get(0).get(0));
 				if (memoryItem == null) {
 					return new FreeVariable(topLevelItems.get(0).get(0));
-				} else {
-					return memoryItem;
 				}
-			} else {
-				return matchingParameter.addBoundedVariable(topLevelItems.get(0).get(0));
+				return memoryItem;
 			}
+
+			return matchingParameter.addBoundedVariable(topLevelItems.get(0).get(0));
 		}
 
 		Expression head = null;
 
 		for (int i = 0; i < topLevelItems.size(); i++) {
-			Expression currentExpression = recursiveParse(topLevelItems.get(i), parameters);
+			Expression currentExpression = recursiveParse(topLevelItems.get(i), parameters == null ? parameters : new ArrayList<>(parameters));
 			if (head == null) {
 				head = currentExpression;
 			} else {
-				if (head instanceof Application) {
+				if (head instanceof Application aHead) {
 					Application newApplication = new Application(head, currentExpression);
-					((Application) head).parent = newApplication;
-					if (currentExpression instanceof Application) {
-						((Application) currentExpression).setParent(newApplication);
+					aHead.parent = newApplication;
+					if (currentExpression instanceof Application aCurrentExpression) {
+						aCurrentExpression.setParent(newApplication);
 					}
-					head = ((Application) head).parent;
+					head = aHead.parent;
 				} else {
 					Application newApplication = new Application(head, currentExpression);
-					if (currentExpression instanceof Application) {
-						((Application) currentExpression).setParent(newApplication);
+					if (currentExpression instanceof Application aCurrentExpression) {
+						aCurrentExpression.setParent(newApplication);
 					}
 					head = newApplication;
 				}
@@ -171,20 +172,6 @@ public class Parser {
 		newParameterList.add(newParameter);
 
 		return newParameterList;
-
-		// if (parameterList == null) {
-		// 	parameterList = new ArrayList<>();
-		// }
-
-		// for (int i = 0; i < parameterList.size(); i++) {
-		// 	if (parameterList.get(i).getName().equals(newParameter.getName())) {
-		// 		parameterList.set(i, newParameter);
-		// 		return parameterList;
-		// 	}
-		// }
-
-		// parameterList.add(newParameter);
-		// return parameterList;
 	}
 
 	private ParameterVariable getMatchingParameter(ArrayList<ParameterVariable> parameterList, String token) {

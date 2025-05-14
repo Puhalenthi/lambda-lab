@@ -10,7 +10,6 @@ import src.variables.Variable;
 public class Runner {
     public static Expression runWithDeepCopy(Expression expression) {
         expression = deepCopy(expression, new ArrayList<>(), null);
-        printExpressionTree(expression, "   ");
         Expression runExpression = run(expression);
         performAlphaReduction(runExpression, new ArrayList<>());
         return runExpression;
@@ -126,7 +125,7 @@ public class Runner {
             case BoundVariable b:
                 String variableName = b.getName();
 
-                for (int i = parameterList.size() - 1; i >= 0; i--) {
+                for (int i = parameterList.size()-1; i >= 0; i--) {
                     if (parameterList.get(i).getName().equals(variableName)) {
                         return parameterList.get(i).addBoundedVariable(variableName);
                     }
@@ -135,9 +134,15 @@ public class Runner {
                 return b.getParameter().addBoundedVariable(variableName);
             case Function f:
                 ParameterVariable p = new ParameterVariable(f.getParameter().getName());
-                parameterList.add(p);
                 Function newFunction = new Function(p, null);
-                newFunction.setExpression(deepCopy(f.getExpression(), parameterList, newFunction));
+
+                ArrayList<ParameterVariable> newParameterList = new ArrayList<>();
+                for (int i = 0; i < parameterList.size(); i++) {
+                    newParameterList.add(parameterList.get(i));
+                }
+                newParameterList.add(p);
+
+                newFunction.setExpression(deepCopy(f.getExpression(), newParameterList, newFunction));
                 return newFunction;
             case Application a:
                 Application newApplication = new Application(null, null, parent);
