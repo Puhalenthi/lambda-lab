@@ -32,6 +32,11 @@ public class Parser {
 			return Runner.runWithDeepCopy(newExpression);
 		}
 
+		// //extra credit 2
+		// if (tokens.size() > 1 && tokens.get(0).equals("populate")){
+
+		// }
+
 		Expression expression = recursiveParse(tokens, null);
 
 		return expression;
@@ -64,6 +69,9 @@ public class Parser {
 	}
 
 	private Expression recursiveParse(ArrayList<String> tokens, ArrayList<ParameterVariable> parameters) {
+		if (tokens.size() == 0){
+			return null;
+		}
 
 		// the tokens describe a function
 		if (tokens.get(0).equals("\\")) {

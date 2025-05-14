@@ -1,5 +1,6 @@
 package src;
 
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 
 import src.variables.BoundVariable;
@@ -26,7 +27,7 @@ public class Runner {
 
             Function leftFunction = (Function) leftmostApplication.left;
             Expression newExpression = runApplication(leftFunction.getParameter(), leftFunction.getExpression(),
-                    leftmostApplication.right, new ArrayList<>(), null);
+                    leftmostApplication.right, null);
 
 
             // Update the parent of the leftmost application
@@ -89,25 +90,24 @@ public class Runner {
         }
     }
 
-    // recursively goes through functionExpression and replaces all variables bound
-    // to paramater with argument
+    // recursively goes through functionExpression and replaces all the variables bound
+    // to parameter with the argument
     private static Expression runApplication(ParameterVariable parameter, Expression functionExpression,
-            Expression argument, ArrayList<ParameterVariable> parameterList, Expression parent) {
+            Expression argument, Expression parent) {
 
         switch (functionExpression) {
             case Application a:
-                a.left = runApplication(parameter, a.left, argument, parameterList, a);
-                a.right = runApplication(parameter, a.right, argument, parameterList, a);
+                a.left = runApplication(parameter, a.left, argument, a);
+                a.right = runApplication(parameter, a.right, argument, a);
                 return a;
             case Function f:
-                parameterList.add(f.getParameter());
-                f.expression = runApplication(parameter, f.expression, argument, parameterList, f);
+                f.expression = runApplication(parameter, f.expression, argument, f);
                 return f;
             case BoundVariable b:
                 if (parameter.getBoundVariables().contains(b)) {
-                    Expression deepCopy = deepCopy(argument, parameterList, null);
-                    if (deepCopy instanceof Application){
-                        ((Application)deepCopy).setParent(parent);
+                    Expression deepCopy = deepCopy(argument, new ArrayList<>(), null);
+                    if (deepCopy instanceof Application a){
+                        a.setParent(parent);
                     }
                     return deepCopy;
                 }
@@ -131,7 +131,7 @@ public class Runner {
                     }
                 }
 
-                return b.getParameter().addBoundedVariable(variableName);
+                return b.getParameter().replaceBoundVariable(b);
             case Function f:
                 ParameterVariable p = new ParameterVariable(f.getParameter().getName());
                 Function newFunction = new Function(p, null);
@@ -195,7 +195,6 @@ public class Runner {
     private static String createNewParameterName(ArrayList<ParameterVariable> parameterList, ParameterVariable v) {
         String baseName = v.getName();
         String newName = baseName;
-        boolean isNotFound = true;
         int counter = 1;
 
         for (int i = 0; i < parameterList.size(); i++) {

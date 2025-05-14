@@ -23,9 +23,9 @@ public class ParameterVariable extends Variable {
     return boundVariables;
   }
 
-  public void replaceBoundVariable(BoundVariable oldVariable, BoundVariable newVariable) {
+  public BoundVariable replaceBoundVariable(BoundVariable oldVariable) {
     boundVariables.remove(oldVariable);
-    boundVariables.add(newVariable);
+    return addBoundedVariable(oldVariable.name);
   }
 
   public void setName(String name) {

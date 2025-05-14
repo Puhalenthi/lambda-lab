@@ -11,32 +11,31 @@ public class Lexer {
 		String variableName = "";
 		char currentChar = input.charAt(index);
 
-		while (currentChar != ';' && index<input.length()){
-			if (currentChar=='(' || currentChar==')' || currentChar=='\\' || currentChar=='.' || currentChar=='=' || currentChar==' '){
-				if (!variableName.equals("")){
+		while (currentChar != ';' && index < input.length()) {
+			if (currentChar == '(' || currentChar == ')' || currentChar == '\\' || currentChar == '.'
+					|| currentChar == '=' || currentChar == ' ') {
+				if (!variableName.equals("")) {
 					tokens.add(variableName);
 					variableName = "";
 				}
-				if (currentChar!=' '){
-					tokens.add(currentChar+"");
+				if (currentChar != ' ') {
+					tokens.add(currentChar + "");
 				}
 			} else {
 				variableName += currentChar;
 			}
 
 			index++;
-			if (index!=input.length()){
+			if (index != input.length()) {
 				currentChar = input.charAt(index);
 			}
 		}
-
-		if (index==input.length()){
-			if (!variableName.equals("")){
+		if (index == input.length() || currentChar == ';') {
+			if (!variableName.equals("")) {
 				tokens.add(variableName);
 			}
 		}
-
 		return tokens;
 	}
-	
+
 }
