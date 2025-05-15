@@ -32,10 +32,17 @@ public class Parser {
 			return Runner.runWithDeepCopy(newExpression);
 		}
 
-		// //extra credit 2
-		// if (tokens.size() > 1 && tokens.get(0).equals("populate")){
-
-		// }
+		//extra credit 2
+		if (tokens.size() > 1 && tokens.get(0).equals("populate")){
+			for (int i = Integer.parseInt(tokens.get(1)); i <= Integer.parseInt(tokens.get(2)); i++){
+				Function fFunction = new Function(new ParameterVariable("f"), new Function(new ParameterVariable("x"), null));
+				Function xFunction = (Function) fFunction.getExpression();
+				xFunction.setExpression(churchEncoding(i, fFunction.getParameter(), xFunction.getParameter()));
+				Memory.add(i + "", fFunction);
+			}
+			System.out.println("Populated numbers " + tokens.get(1) + " to " + tokens.get(2));
+			return null;
+		}
 
 		Expression expression = recursiveParse(tokens, null);
 
@@ -193,5 +200,13 @@ public class Parser {
 			}
 		}
 		return null;
+	}
+
+	private Expression churchEncoding(int n, ParameterVariable parameterF, ParameterVariable parameterX){
+		if (n == 0){
+			return parameterX.addBoundedVariable("x");
+		}
+
+		return new Application(parameterF.addBoundedVariable("f"), churchEncoding(n-1, parameterF, parameterX));
 	}
 }
