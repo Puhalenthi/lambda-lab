@@ -15,7 +15,7 @@ public class Parser {
 	 * Turns a set of tokens into an expression. Comment this back in when you're
 	 * ready.
 	 */
-	public Expression parse(ArrayList<String> tokens) throws ParseException, DuplicateKeyException {
+	public Expression parse(ArrayList<String> tokens) throws ParseException, DuplicateKeyException, NumberFormatException {
 		preparse(tokens);
 
 		// setting an expression
@@ -28,23 +28,33 @@ public class Parser {
 
 		// running an expression
 		if (tokens.size() > 1 && tokens.get(0).equals("run")) {
-			Expression newExpression = recursiveParse(new ArrayList<String>(tokens.subList(1, tokens.size())), null);
+			Expression newExpression = parse(new ArrayList<String>(tokens.subList(1, tokens.size())));
 			return Runner.runWithDeepCopy(newExpression);
 		}
 
-		//extra credit 2
-		if (tokens.size() > 1 && tokens.get(0).equals("populate")){
-			for (int i = Integer.parseInt(tokens.get(1)); i <= Integer.parseInt(tokens.get(2)); i++){
-				Function fFunction = new Function(new ParameterVariable("f"), new Function(new ParameterVariable("x"), null));
-				Function xFunction = (Function) fFunction.getExpression();
-				xFunction.setExpression(churchEncoding(i, fFunction.getParameter(), xFunction.getParameter()));
-				Memory.add(i + "", fFunction);
+		// extra credit 2
+		if (tokens.size() > 1 && tokens.get(0).equals("populate")) {
+
+			for (int i = Integer.parseInt(tokens.get(1)); i <= Integer.parseInt(tokens.get(2)); i++) {
+				if (i < 0){
+					System.out.println("Cannot populate negative numbers.");
+					return null;
+				}
+
+				if (Memory.contains(i + "")) {
+					continue;
+				}
+
+				Function f = new Function(new ParameterVariable("f"), new Function(new ParameterVariable("x"), null));
+				Function x = (Function) f.getExpression();
+				x.setExpression(churchEncoding(i, f.getParameter(), x.getParameter()));
+				Memory.add(i + "", f);
 			}
 			System.out.println("Populated numbers " + tokens.get(1) + " to " + tokens.get(2));
 			return null;
 		}
 
-		Expression expression = recursiveParse(tokens, null);
+		Expression expression = runParse(tokens, null);
 
 		return expression;
 	}
@@ -75,8 +85,8 @@ public class Parser {
 		}
 	}
 
-	private Expression recursiveParse(ArrayList<String> tokens, ArrayList<ParameterVariable> parameters) {
-		if (tokens.size() == 0){
+	private Expression runParse(ArrayList<String> tokens, ArrayList<ParameterVariable> parameters) {
+		if (tokens.size() == 0) {
 			return null;
 		}
 
@@ -86,7 +96,7 @@ public class Parser {
 			ParameterVariable parameterVariable = new ParameterVariable(tokens.get(1));
 			ArrayList<ParameterVariable> newParameterList = addOrUpdateParameterList(parameters, parameterVariable);
 
-			Expression parsedExpression = recursiveParse(new ArrayList<String>(tokens.subList(3, tokens.size())),
+			Expression parsedExpression = runParse(new ArrayList<String>(tokens.subList(3, tokens.size())),
 					newParameterList);
 			Function newFunction = new Function(parameterVariable, parsedExpression);
 
@@ -111,13 +121,14 @@ public class Parser {
 				return memoryItem;
 			}
 
-			return matchingParameter.addBoundedVariable(topLevelItems.get(0).get(0));
+			return matchingParameter.addBoundVariable(topLevelItems.get(0).get(0));
 		}
 
 		Expression head = null;
 
 		for (int i = 0; i < topLevelItems.size(); i++) {
-			Expression currentExpression = recursiveParse(topLevelItems.get(i), parameters == null ? parameters : new ArrayList<>(parameters));
+			Expression currentExpression = runParse(topLevelItems.get(i),
+					parameters == null ? parameters : new ArrayList<>(parameters));
 			if (head == null) {
 				head = currentExpression;
 			} else {
@@ -176,7 +187,7 @@ public class Parser {
 			ParameterVariable newParameter) {
 
 		ArrayList<ParameterVariable> newParameterList = new ArrayList<>();
-		if (parameterList == null){
+		if (parameterList == null) {
 			newParameterList.add(newParameter);
 			return newParameterList;
 		}
@@ -194,7 +205,7 @@ public class Parser {
 			return null;
 		}
 
-		for (int i=parameterList.size()-1; i>=0; i--) {
+		for (int i = parameterList.size() - 1; i >= 0; i--) {
 			if (parameterList.get(i).getName().equals(token)) {
 				return parameterList.get(i);
 			}
@@ -202,11 +213,15 @@ public class Parser {
 		return null;
 	}
 
-	private Expression churchEncoding(int n, ParameterVariable parameterF, ParameterVariable parameterX){
-		if (n == 0){
-			return parameterX.addBoundedVariable("x");
+	private Expression churchEncoding(int n, ParameterVariable parameterF, ParameterVariable parameterX) {
+		if (n < 0) {
+			return null;
 		}
 
-		return new Application(parameterF.addBoundedVariable("f"), churchEncoding(n-1, parameterF, parameterX));
+		if (n == 0) {
+			return parameterX.addBoundVariable("x");
+		}
+
+		return new Application(parameterF.addBoundVariable("f"), churchEncoding(n - 1, parameterF, parameterX));
 	}
 }

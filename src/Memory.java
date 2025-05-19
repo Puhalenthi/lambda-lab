@@ -16,4 +16,8 @@ public class Memory {
     public static Expression get(String variableName) throws IllegalArgumentException {
         return memory.get(variableName);
     }
+
+    public static boolean contains(String variableName) {
+        return memory.containsKey(variableName);
+    }
 }

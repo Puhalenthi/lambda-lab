@@ -9,14 +9,14 @@ public class ParameterVariable extends Variable {
     this.name = name;
   }
 
-  public BoundVariable addBoundedVariable(String token) {
+  public BoundVariable addBoundVariable(String token) {
     BoundVariable newBoundVariable = new BoundVariable(token, this);
     boundVariables.add(newBoundVariable);
     return newBoundVariable;
   }
 
   // public String toString() {
-  //   return "P:" + this.name;
+  // return "P:" + this.name;
   // }
 
   public ArrayList<BoundVariable> getBoundVariables() {
@@ -25,7 +25,7 @@ public class ParameterVariable extends Variable {
 
   public BoundVariable replaceBoundVariable(BoundVariable oldVariable) {
     boundVariables.remove(oldVariable);
-    return addBoundedVariable(oldVariable.name);
+    return addBoundVariable(oldVariable.name);
   }
 
   public void setName(String name) {

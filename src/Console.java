@@ -33,6 +33,9 @@ public class Console {
 				} catch (DuplicateKeyException e){
 					System.out.println(e.getMessage());
 					continue;
+				} catch (NumberFormatException e) {
+					System.out.println(e.getMessage());
+					continue;
 				} catch (Exception e) {
 					System.out.println(e);
 					e.printStackTrace();

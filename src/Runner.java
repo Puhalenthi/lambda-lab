@@ -12,6 +12,7 @@ public class Runner {
     public static Expression runWithDeepCopy(Expression expression) {
         expression = deepCopy(expression, new ArrayList<>(), null);
         Expression runExpression = run(expression);
+        System.out.println("Expression before alpha reduction: " + runExpression);
         performAlphaReduction(runExpression, new ArrayList<>());
         return runExpression;
     }
@@ -28,7 +29,6 @@ public class Runner {
             Function leftFunction = (Function) leftmostApplication.left;
             Expression newExpression = runApplication(leftFunction.getParameter(), leftFunction.getExpression(),
                     leftmostApplication.right, null);
-
 
             // Update the parent of the leftmost application
             switch (leftmostApplication.parent) {
@@ -90,7 +90,8 @@ public class Runner {
         }
     }
 
-    // recursively goes through functionExpression and replaces all the variables bound
+    // recursively goes through functionExpression and replaces all the variables
+    // bound
     // to parameter with the argument
     private static Expression runApplication(ParameterVariable parameter, Expression functionExpression,
             Expression argument, Expression parent) {
@@ -106,7 +107,7 @@ public class Runner {
             case BoundVariable b:
                 if (parameter.getBoundVariables().contains(b)) {
                     Expression deepCopy = deepCopy(argument, new ArrayList<>(), null);
-                    if (deepCopy instanceof Application a){
+                    if (deepCopy instanceof Application a) {
                         a.setParent(parent);
                     }
                     return deepCopy;
@@ -125,9 +126,9 @@ public class Runner {
             case BoundVariable b:
                 String variableName = b.getName();
 
-                for (int i = parameterList.size()-1; i >= 0; i--) {
+                for (int i = parameterList.size() - 1; i >= 0; i--) {
                     if (parameterList.get(i).getName().equals(variableName)) {
-                        return parameterList.get(i).addBoundedVariable(variableName);
+                        return parameterList.get(i).addBoundVariable(variableName);
                     }
                 }
 
@@ -167,7 +168,7 @@ public class Runner {
                 ParameterVariable parameterToBeChanged;
                 do {
                     parameterToBeChanged = null;
-                    for (ParameterVariable pv: parameterList){
+                    for (ParameterVariable pv : parameterList) {
                         if (pv.getName().equals(bv.getName()) && !pv.getBoundVariables().contains(bv)) {
                             parameterToBeChanged = pv;
                             break;
@@ -211,7 +212,7 @@ public class Runner {
     private static void printExpressionTree(Expression expression, String indent) {
         if (expression instanceof FreeVariable) {
             System.out.println(indent + "Free Variable: " + expression);
-        } else if (expression instanceof BoundVariable){
+        } else if (expression instanceof BoundVariable) {
             System.out.println(indent + "Bound Variable: " + expression);
         } else if (expression instanceof Function) {
             Function f = (Function) expression;
