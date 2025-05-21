@@ -12,15 +12,17 @@ public class Runner {
     public static Expression runWithDeepCopy(Expression expression) {
         expression = deepCopy(expression, new ArrayList<>(), null);
         Expression runExpression = run(expression);
-        System.out.println("Expression before alpha reduction: " + runExpression);
+        //System.out.println("Expression before alpha reduction: " + runExpression);
         performAlphaReduction(runExpression, new ArrayList<>());
         return runExpression;
     }
 
     public static Expression run(Expression expression) {
         Application leftmostApplication = findLeftmostRunnableApplication(expression);
+        //printExpressionTree(expression, "   ");
 
         while (leftmostApplication != null) {
+            //System.out.println("Leftmost: " + leftmostApplication);
             // Ensure the left side is a Function
             if (!(leftmostApplication.left instanceof Function)) {
                 throw new IllegalStateException("Left side of application is not a function.");
@@ -29,6 +31,7 @@ public class Runner {
             Function leftFunction = (Function) leftmostApplication.left;
             Expression newExpression = runApplication(leftFunction.getParameter(), leftFunction.getExpression(),
                     leftmostApplication.right, null);
+            //System.out.println("New Expression: " + newExpression);
 
             // Update the parent of the leftmost application
             switch (leftmostApplication.parent) {

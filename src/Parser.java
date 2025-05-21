@@ -15,8 +15,10 @@ public class Parser {
 	 * Turns a set of tokens into an expression. Comment this back in when you're
 	 * ready.
 	 */
-	public Expression parse(ArrayList<String> tokens) throws ParseException, DuplicateKeyException, NumberFormatException {
+	public Expression parse(ArrayList<String> tokens)
+			throws ParseException, DuplicateKeyException, NumberFormatException {
 		preparse(tokens);
+		System.out.println(tokens);
 
 		// setting an expression
 		if (tokens.size() > 2 && tokens.get(1).equals("=")) {
@@ -36,7 +38,7 @@ public class Parser {
 		if (tokens.size() > 1 && tokens.get(0).equals("populate")) {
 
 			for (int i = Integer.parseInt(tokens.get(1)); i <= Integer.parseInt(tokens.get(2)); i++) {
-				if (i < 0){
+				if (i < 0) {
 					System.out.println("Cannot populate negative numbers.");
 					return null;
 				}
@@ -63,22 +65,30 @@ public class Parser {
 		Stack<String> parenBalancer = new Stack<>();
 
 		for (int i = 0; i < tokens.size(); i++) {
-			if (tokens.get(i).equals("\\") && (i < 1 || !tokens.get(i - 1).equals("("))) {
-				tokens.add(i, "(");
+			if ( i < tokens.size()-1 && tokens.get(i+1).equals("\\") && !tokens.get(i).equals("(")) {
+				tokens.add(i+1, "(");
 				parenBalancer.add("a");
 				i++;
-			} else if (tokens.get(i).equals("(")) {
+			} else if (tokens.get(i).equals("(") && !parenBalancer.isEmpty()) {
 				parenBalancer.add("(");
 			} else if (tokens.get(i).equals(")") && parenBalancer.peek().equals("(")) {
 				parenBalancer.pop();
+				while (!parenBalancer.isEmpty() && parenBalancer.peek().equals("a")){
+					tokens.add(i, ")");
+					parenBalancer.pop();
+					i++;
+				}
 			} else if (tokens.get(i).equals(")") && parenBalancer.peek().equals("a")) {
-				tokens.add(i, ")");
-				parenBalancer.pop();
-				parenBalancer.pop();
-				i++;
+				while (!parenBalancer.isEmpty() && parenBalancer.peek().equals("a")){
+					tokens.add(i, ")");
+					parenBalancer.pop();
+					i++;
+				}
 			}
+			System.out.println("Tokens: " + tokens);
+			System.out.println("Paren Balancer: " + parenBalancer);
 		}
-
+		//System.out.println("Paren Balancer: " + parenBalancer);
 		while (!parenBalancer.isEmpty()) {
 			tokens.add(")");
 			parenBalancer.pop();
