@@ -5,7 +5,7 @@ public class FreeVariable extends Variable {
 		this.name = name;
 	}
 
-	// public String toString() {
-	// 	return "F:" + this.name;
-	// }
+	public String toString() {
+		return "\033[32m" + this.name + "\033[0m";
+	}
 }

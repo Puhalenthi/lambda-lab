@@ -16,7 +16,7 @@ public class BoundVariable extends Variable {
         return parameter;
     }
 
-    // public String toString() {
-    //     return "B:" + this.name;
-    // }
+    public String toString() {
+        return "\u001B[31m" + this.name + "\u001B[0m";
+    }
 }

@@ -15,9 +15,9 @@ public class ParameterVariable extends Variable {
     return newBoundVariable;
   }
 
-  // public String toString() {
-  // return "P:" + this.name;
-  // }
+  public String toString() {
+    return "\u001B[34m" + this.name + "\u001B[0m";
+  }
 
   public ArrayList<BoundVariable> getBoundVariables() {
     return boundVariables;

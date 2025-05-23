@@ -61,36 +61,33 @@ public class Parser {
 	}
 
 	private void preparse(ArrayList<String> tokens) {
-		Stack<Character> parenBalancer = new Stack<>();
+		Stack<Integer> lambdaPositions = new Stack<>();
 
 		for (int i = 0; i < tokens.size(); i++) {
-			if (i < tokens.size() - 1 && tokens.get(i + 1).equals("\\") && !tokens.get(i).equals("(")) {
-				tokens.add(i + 1, "(");
-				parenBalancer.add('a');
-				i++;
-			} else if (tokens.get(i).equals("(") && !parenBalancer.isEmpty()) {
-				parenBalancer.add('(');
-			} else if (tokens.get(i).equals(")") && !parenBalancer.isEmpty() && parenBalancer.peek() == '(') {
-				parenBalancer.pop();
-				while (!parenBalancer.isEmpty() && parenBalancer.peek() == 'a') {
-					tokens.add(i, ")");
-					parenBalancer.pop();
-					i++;
+			if (tokens.get(i).equals("\\")) {
+				// if lambda operator is not preceded by an opening parenthesis, insert one
+				if (i == 0 || !tokens.get(i - 1).equals("(")) {
+					tokens.add(i, "(");
+					lambdaPositions.push(i);
+					i++; // move past the inserted parenthesis and lambda operator
 				}
-			} else if (tokens.get(i).equals(")") && !parenBalancer.isEmpty() && parenBalancer.peek() == 'a') {
-				while (!parenBalancer.isEmpty() && parenBalancer.peek() == 'a') {
-					tokens.add(i, ")");
-					parenBalancer.pop();
-					i++;
+			} else if (tokens.get(i).equals("(")) {
+				lambdaPositions.push(i);
+			} else if (tokens.get(i).equals(")")) {
+				// if a closing parenthesis is found, try to balance an inserted lambda opening
+				if (!lambdaPositions.isEmpty()) {
+					lambdaPositions.pop();
 				}
 			}
 		}
-		
-		// System.out.println("Paren Balancer: " + parenBalancer);
-		while (!parenBalancer.isEmpty()) {
+
+		// add missing closing parentheses for every unmatched lambda opening
+		while (!lambdaPositions.isEmpty()) {
 			tokens.add(")");
-			parenBalancer.pop();
+			lambdaPositions.pop();
 		}
+
+		System.out.println("Tokens: " + tokens);
 	}
 
 	private Expression runParse(ArrayList<String> tokens, ArrayList<ParameterVariable> parameters) {
