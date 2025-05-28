@@ -25,7 +25,6 @@ public class Runner {
         // printExpressionTree(expression, " ");
 
         while (leftmostApplication != null) {
-            System.out.println("Leftmost: " + leftmostApplication);
             // Ensure the left side is a Function
             if (!(leftmostApplication.left instanceof Function)) {
                 throw new IllegalStateException("Left side of application is not a function.");
@@ -34,7 +33,6 @@ public class Runner {
             Function leftFunction = (Function) leftmostApplication.left;
             Expression newExpression = runApplication(leftFunction.getParameter(), leftFunction.getExpression(),
                     leftmostApplication.right, null);
-            System.out.println("New Expression: " + newExpression);
 
             // Update the parent of the leftmost application
             switch (leftmostApplication.parent) {
@@ -49,6 +47,9 @@ public class Runner {
                     }
                     break;
                 case null:
+                    if (newExpression instanceof Application a) {
+                        a.setParent(null);
+                    }
                     return run(newExpression);
                 default:
                     break;
@@ -74,6 +75,11 @@ public class Runner {
             case Function f:
                 return findLeftmostRunnableApplication(f.expression);
             case Application a:
+
+                if (a.left instanceof Function) {
+                    return a;
+                }
+
                 Application leftmostApplication = findLeftmostRunnableApplication(a.left);
 
                 // checking the left side of the application
@@ -81,16 +87,7 @@ public class Runner {
                     return leftmostApplication;
                 }
 
-                leftmostApplication = findLeftmostRunnableApplication(a.right);
-
-                // checking the right side of the application
-                if (leftmostApplication != null) {
-                    return leftmostApplication;
-                } else if (a.left instanceof Function) {
-                    return a;
-                } else {
-                    return null;
-                }
+                return findLeftmostRunnableApplication(a.right);
             default:
                 return null;
         }
