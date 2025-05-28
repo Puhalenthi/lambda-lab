@@ -25,7 +25,7 @@ public class Runner {
         // printExpressionTree(expression, " ");
 
         while (leftmostApplication != null) {
-            // System.out.println("Leftmost: " + leftmostApplication);
+            System.out.println("Leftmost: " + leftmostApplication);
             // Ensure the left side is a Function
             if (!(leftmostApplication.left instanceof Function)) {
                 throw new IllegalStateException("Left side of application is not a function.");
@@ -34,7 +34,7 @@ public class Runner {
             Function leftFunction = (Function) leftmostApplication.left;
             Expression newExpression = runApplication(leftFunction.getParameter(), leftFunction.getExpression(),
                     leftmostApplication.right, null);
-            // System.out.println("New Expression: " + newExpression);
+            System.out.println("New Expression: " + newExpression);
 
             // Update the parent of the leftmost application
             switch (leftmostApplication.parent) {

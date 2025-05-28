@@ -61,33 +61,34 @@ public class Parser {
 	}
 
 	private void preparse(ArrayList<String> tokens) {
-		Stack<Integer> lambdaPositions = new Stack<>();
+		Stack<Character> parenBalancer = new Stack<>();
+		//bottom of stack to avoid emptystack errors
+		parenBalancer.add('b');
 
 		for (int i = 0; i < tokens.size(); i++) {
-			if (tokens.get(i).equals("\\")) {
-				// if lambda operator is not preceded by an opening parenthesis, insert one
-				if (i == 0 || !tokens.get(i - 1).equals("(")) {
-					tokens.add(i, "(");
-					lambdaPositions.push(i);
-					i++; // move past the inserted parenthesis and lambda operator
-				}
+			if (tokens.get(i).equals("\\") && (i == 0 || !tokens.get(i - 1).equals("("))) {
+				tokens.add(i, "(");
+				parenBalancer.add('a');
+				i++;
 			} else if (tokens.get(i).equals("(")) {
-				lambdaPositions.push(i);
+				parenBalancer.add('(');
 			} else if (tokens.get(i).equals(")")) {
-				// if a closing parenthesis is found, try to balance an inserted lambda opening
-				if (!lambdaPositions.isEmpty()) {
-					lambdaPositions.pop();
+				while (parenBalancer.peek() == 'a') {
+					tokens.add(i, ")");
+					i++;
+					parenBalancer.pop();
+				}
+
+				if (parenBalancer.peek() == '(') {
+					parenBalancer.pop();
 				}
 			}
 		}
 
-		// add missing closing parentheses for every unmatched lambda opening
-		while (!lambdaPositions.isEmpty()) {
+		while (parenBalancer.peek() != 'b') {
 			tokens.add(")");
-			lambdaPositions.pop();
+			parenBalancer.pop();
 		}
-
-		System.out.println("Tokens: " + tokens);
 	}
 
 	private Expression runParse(ArrayList<String> tokens, ArrayList<ParameterVariable> parameters) {
