@@ -11,11 +11,7 @@ import src.variables.Variable;
 public class Runner {
     public static Expression runWithDeepCopy(Expression expression) {
         expression = deepCopy(expression, new ArrayList<>(), null);
-        System.out.println("Expression after deep copy: " + expression);
         Expression runExpression = run(expression);
-
-        System.out.println("Expression before alpha reduction: " + runExpression);
-
         performAlphaReduction(runExpression, new ArrayList<>());
         return runExpression;
     }
