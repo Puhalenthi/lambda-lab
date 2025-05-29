@@ -13,7 +13,10 @@ public class Runner {
         expression = deepCopy(expression, new ArrayList<>(), null);
         Expression runExpression = run(expression);
         performAlphaReduction(runExpression, new ArrayList<>());
-        return runExpression;
+        
+        String matched = findMatchingExpressionInMemory(runExpression);
+
+        return (matched == null) ? runExpression : new FreeVariable(matched);
     }
 
     public static Expression run(Expression expression) {
@@ -206,6 +209,40 @@ public class Runner {
         }
 
         return newName;
+    }
+
+    private static String findMatchingExpressionInMemory(Expression expression1) {
+        for (var v : Memory.getEntries()) {
+            if (isAlphaEquivalent(expression1, v.getValue(), new ArrayList<>(), new ArrayList<>())) {
+                return v.getKey();
+            }
+        }
+        return null;
+    }
+
+    private static boolean isAlphaEquivalent(Expression e1, Expression e2, ArrayList<String> boundVars1, ArrayList<String> boundVars2) {
+        if (e1 == null || e2 == null) return e1 == e2;
+        if (e1.getClass() != e2.getClass()) return false;
+
+
+        if (e1 instanceof FreeVariable fv1 && e2 instanceof FreeVariable fv2) {
+            return fv1.getName().equals(fv2.getName());
+        } else if (e1 instanceof BoundVariable bv1 && e2 instanceof BoundVariable bv2) {
+            int index1 = boundVars1.lastIndexOf(bv1.getName());
+            int index2 = boundVars2.lastIndexOf(bv2.getName());
+            return index1 == index2 && index1 != -1;
+        } else if (e1 instanceof Function f1 && e2 instanceof Function f2) {
+            ArrayList<String> newBoundVars1 = new ArrayList<>(boundVars1);
+            ArrayList<String> newBoundVars2 = new ArrayList<>(boundVars2);
+            newBoundVars1.add(f1.getParameter().getName());
+            newBoundVars2.add(f2.getParameter().getName());
+            return isAlphaEquivalent(f1.getExpression(), f2.getExpression(), newBoundVars1, newBoundVars2);
+        } else if (e1 instanceof Application a1 && e2 instanceof Application a2) {
+            return isAlphaEquivalent(a1.left, a2.left, boundVars1, boundVars2)
+            && isAlphaEquivalent(a1.right, a2.right, boundVars1, boundVars2);
+        } else {
+            return false;
+        }
     }
 
     private static void printExpressionTree(Expression expression, String indent) {
