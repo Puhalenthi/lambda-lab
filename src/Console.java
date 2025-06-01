@@ -16,7 +16,7 @@ public class Console {
 		Lexer lexer = new Lexer();
 		Parser parser = new Parser();
 
-		String input = cleanConsoleInput().trim();  // see comment
+		String input = cleanConsoleInput().trim();
 
 		while (!input.equalsIgnoreCase("exit")) {
 			String output = "";
@@ -32,12 +32,14 @@ public class Console {
 					}
 				} catch (DuplicateKeyException e){
 					System.out.println(e.getMessage());
+					input = cleanConsoleInput().trim();
+					continue;
 				} catch (NumberFormatException e) {
 					System.out.println(e.getMessage());
+					input = cleanConsoleInput().trim();
+					continue;
 				} catch (Exception e) {
-					System.out.println(e);
-					e.printStackTrace();
-					//System.out.println("Unparsable expression, input was: \"" + input + "\"");
+					System.out.println("Unparsable expression, input was: \"" + input + "\"");
 					input = cleanConsoleInput().trim();
 					continue;
 				}

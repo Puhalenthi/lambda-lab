@@ -3,7 +3,6 @@ package src;
 import java.util.ArrayList;
 
 public class Lexer {
-
 	public ArrayList<String> tokenize(String input) {
 		ArrayList<String> tokens = new ArrayList<String>();
 
@@ -25,17 +24,20 @@ public class Lexer {
 				variableName += currentChar;
 			}
 
+
 			index++;
 			if (index != input.length()) {
 				currentChar = input.charAt(index);
 			}
 		}
+
+
 		if (index == input.length() || currentChar == ';') {
 			if (!variableName.equals("")) {
 				tokens.add(variableName);
 			}
 		}
+
 		return tokens;
 	}
-
 }

@@ -8,14 +8,16 @@ public class BoundVariable extends Variable {
         this.parameter = parameter;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public ParameterVariable getParameter() {
         return parameter;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    
     public String toString() {
         return "\u001B[31m" + this.name + "\u001B[0m";
     }

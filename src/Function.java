@@ -3,7 +3,6 @@ package src;
 import src.variables.ParameterVariable;
 
 public class Function implements Expression {
-
    ParameterVariable parameter;
    Expression expression;
 
@@ -12,9 +11,6 @@ public class Function implements Expression {
         this.expression = expression;
     }
 
-    public String toString(){
-        return "(λ" + parameter + "." + expression + ")";
-    }
 
     public ParameterVariable getParameter(){
         return parameter;
@@ -26,5 +22,10 @@ public class Function implements Expression {
 
     public void setExpression(Expression e){
         expression = e;
+    }
+
+    
+    public String toString(){
+        return "(λ" + parameter + "." + expression + ")";
     }
 }

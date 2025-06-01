@@ -1,10 +1,10 @@
 package src;
 
 public class Application implements Expression {
-
     Expression left;
     Expression right;
     Expression parent;
+
 
     public Application(Expression a, Expression b, Expression parent) {
         left = a;
@@ -16,14 +16,6 @@ public class Application implements Expression {
         this(a, b, null);
     }
 
-    public String toString() {
-        return "(" + left + " " + right + ")";
-    }
-
-    // just for debugging purposes
-    // public String toString() {
-    //     return "[" + left + " " + right + (parent != null) + "]";
-    // }
 
     public void setLeft(Expression e) {
         left = e;
@@ -35,5 +27,10 @@ public class Application implements Expression {
 
     public void setParent(Expression e) {
         parent = e;
+    }
+
+
+    public String toString() {
+        return "(" + left + " " + right + ")";
     }
 }
