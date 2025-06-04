@@ -217,7 +217,6 @@ public class Parser {
 	 * Recursively constructs the church numeral representation for the number
 	 */
 	private Expression churchEncoding(int n, ParameterVariable parameterF, ParameterVariable parameterX) {
-		// recursively constructs the church numeral representation for the number
 		if (n < 0) {
 			return null;
 		}
