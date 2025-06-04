@@ -12,14 +12,13 @@ public class Parser {
 	ArrayList<ParameterVariable> debugParameterList = new ArrayList<>();
 
 	/*
-	 * Turns a set of tokens into an expression. Comment this back in when you're
-	 * ready.
+	 * Turns a set of tokens into an expression.
+	 * Handles assignment, run, and populate commands
 	 */
 	public Expression parse(ArrayList<String> tokens)
 			throws ParseException, DuplicateKeyException, NumberFormatException {
 		preparse(tokens);
 
-		// setting an expression
 		if (tokens.size() > 2 && tokens.get(1).equals("=")) {
 			Expression expression = Memory.add(tokens.get(0),
 					parse(new ArrayList<String>(tokens.subList(2, tokens.size()))));
@@ -27,25 +26,20 @@ public class Parser {
 			return null;
 		}
 
-		// running an expression
 		if (tokens.size() > 1 && tokens.get(0).equals("run")) {
 			Expression newExpression = parse(new ArrayList<String>(tokens.subList(1, tokens.size())));
 			return Runner.runWithDeepCopy(newExpression);
 		}
 
-		// extra credit 2
 		if (tokens.size() > 1 && tokens.get(0).equals("populate")) {
-
 			for (int i = Integer.parseInt(tokens.get(1)); i <= Integer.parseInt(tokens.get(2)); i++) {
 				if (i < 0) {
 					System.out.println("Cannot populate negative numbers.");
 					return null;
 				}
-
 				if (Memory.contains(i + "")) {
 					continue;
 				}
-
 				Function f = new Function(new ParameterVariable("f"), new Function(new ParameterVariable("x"), null));
 				Function x = (Function) f.getExpression();
 				x.setExpression(churchEncoding(i, f.getParameter(), x.getParameter()));
@@ -56,13 +50,15 @@ public class Parser {
 		}
 
 		Expression expression = runParse(tokens, null);
-
 		return expression;
 	}
 
+
+	/*
+	 * Adjusts tokens by adding parenthesis before and after lambda expressions
+	 */
 	private void preparse(ArrayList<String> tokens) {
 		Stack<Character> parenBalancer = new Stack<>();
-		//bottom of stack to avoid emptystack errors
 		parenBalancer.add('b');
 
 		for (int i = 0; i < tokens.size(); i++) {
@@ -78,47 +74,44 @@ public class Parser {
 					i++;
 					parenBalancer.pop();
 				}
-
 				if (parenBalancer.peek() == '(') {
 					parenBalancer.pop();
 				}
 			}
 		}
-
 		while (parenBalancer.peek() != 'b') {
 			tokens.add(")");
 			parenBalancer.pop();
 		}
 	}
 
+
+	/*
+	 * Recursively parses tokens into an expression with proper parameter scoping
+	 */
 	private Expression runParse(ArrayList<String> tokens, ArrayList<ParameterVariable> parameters) {
 		if (tokens.size() == 0) {
 			return null;
 		}
 
-		// the tokens describe a function
 		if (tokens.get(0).equals("\\")) {
-
+			// handles lambda abstraction; constructs a function expression
 			ParameterVariable parameterVariable = new ParameterVariable(tokens.get(1));
 			ArrayList<ParameterVariable> newParameterList = addOrUpdateParameterList(parameters, parameterVariable);
-
 			Expression parsedExpression = runParse(new ArrayList<String>(tokens.subList(3, tokens.size())),
 					newParameterList);
 			Function newFunction = new Function(parameterVariable, parsedExpression);
-
 			if (parsedExpression instanceof Application parsedApplication) {
 				parsedApplication.setParent(newFunction);
 			}
-
 			return newFunction;
 		}
 
 		ArrayList<ArrayList<String>> topLevelItems = separateTopLevelItems(tokens);
 
-		// the tokens describe a single variable
 		if (topLevelItems.size() == 1 && topLevelItems.get(0).size() == 1) {
+			// returns a variable expression as either free or bound based on current context
 			ParameterVariable matchingParameter = getMatchingParameter(parameters, topLevelItems.get(0).get(0));
-
 			if (matchingParameter == null) {
 				Expression memoryItem = Memory.get(topLevelItems.get(0).get(0));
 				if (memoryItem == null) {
@@ -126,13 +119,12 @@ public class Parser {
 				}
 				return memoryItem;
 			}
-
 			return matchingParameter.addBoundVariable(topLevelItems.get(0).get(0));
 		}
 
 		Expression head = null;
-
 		for (int i = 0; i < topLevelItems.size(); i++) {
+			// constructs application expressions by consecutively combining items
 			Expression currentExpression = runParse(topLevelItems.get(i),
 					parameters == null ? parameters : new ArrayList<>(parameters));
 			if (head == null) {
@@ -154,24 +146,23 @@ public class Parser {
 				}
 			}
 		}
-
 		return head;
 	}
 
+
+	/*
+	 * Seperated tokens into top-level items by tracking balanced parenthesis
+	 */
 	private ArrayList<ArrayList<String>> separateTopLevelItems(ArrayList<String> tokens) {
 		ArrayList<ArrayList<String>> topLevelItems = new ArrayList<>();
-
 		ArrayList<String> currentItem = new ArrayList<>();
-		int openingParenCount = 0;
 
+		int openingParenCount = 0;
 		for (int i = 0; i < tokens.size(); i++) {
 			String token = tokens.get(i);
-
-			// currently inside a top level item
 			if (openingParenCount != 0 && (!token.equals(")") || openingParenCount > 1)) {
 				currentItem.add(token);
 			}
-
 			if (token.equals("(")) {
 				openingParenCount++;
 			} else if (token.equals(")")) {
@@ -189,28 +180,31 @@ public class Parser {
 		return topLevelItems;
 	}
 
+
+	/*
+	 * Adds a new parameter to the existing list or creates a new list if none exists
+	 */
 	private ArrayList<ParameterVariable> addOrUpdateParameterList(ArrayList<ParameterVariable> parameterList,
 			ParameterVariable newParameter) {
-
 		ArrayList<ParameterVariable> newParameterList = new ArrayList<>();
 		if (parameterList == null) {
 			newParameterList.add(newParameter);
 			return newParameterList;
 		}
-
 		for (int i = 0; i < parameterList.size(); i++) {
 			newParameterList.add(parameterList.get(i));
 		}
 		newParameterList.add(newParameter);
-
 		return newParameterList;
 	}
 
+	/*
+	 * Retrieves the most recent parameter matching the token
+	 */
 	private ParameterVariable getMatchingParameter(ArrayList<ParameterVariable> parameterList, String token) {
 		if (parameterList == null) {
 			return null;
 		}
-
 		for (int i = parameterList.size() - 1; i >= 0; i--) {
 			if (parameterList.get(i).getName().equals(token)) {
 				return parameterList.get(i);
@@ -219,15 +213,17 @@ public class Parser {
 		return null;
 	}
 
+	/*
+	 * Recursively constructs the church numeral representation for the number
+	 */
 	private Expression churchEncoding(int n, ParameterVariable parameterF, ParameterVariable parameterX) {
+		// recursively constructs the church numeral representation for the number
 		if (n < 0) {
 			return null;
 		}
-
 		if (n == 0) {
 			return parameterX.addBoundVariable("x");
 		}
-
 		return new Application(parameterF.addBoundVariable("f"), churchEncoding(n - 1, parameterF, parameterX));
 	}
 }

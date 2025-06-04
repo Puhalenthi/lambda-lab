@@ -29,7 +29,6 @@ public class Application implements Expression {
         parent = e;
     }
 
-
     public String toString() {
         return "(" + left + " " + right + ")";
     }

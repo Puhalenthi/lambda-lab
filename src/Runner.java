@@ -9,6 +9,10 @@ import src.variables.ParameterVariable;
 import src.variables.Variable;
 
 public class Runner {
+    /* 
+     * Creates a deep copy of the given expression, runs it, performs alpha reduction,
+     * and returns either the reduced expression or a free variable if a matching expression is found.
+     */
     public static Expression runWithDeepCopy(Expression expression) {
         expression = deepCopy(expression, new ArrayList<>(), null);
         Expression runExpression = run(expression);
@@ -19,9 +23,12 @@ public class Runner {
         return (matched == null) ? runExpression : new FreeVariable(matched);
     }
 
+    /* 
+     * Executes the expression by repeatedly performing function application (beta reduction)
+     * until no further runnable application is found.
+     */
     public static Expression run(Expression expression) {
         Application leftmostApplication = findLeftmostRunnableApplication(expression);
-        // printExpressionTree(expression, " ");
 
         while (leftmostApplication != null) {
             // Ensure the left side is a Function
@@ -67,6 +74,10 @@ public class Runner {
         return expression;
     }
 
+    /* 
+     * Recursively finds the leftmost function application that can be executed (runnable).
+     * Returns the application if found, otherwise null.
+     */
     private static Application findLeftmostRunnableApplication(Expression expression) {
         switch (expression) {
             case Variable v:
@@ -92,9 +103,10 @@ public class Runner {
         }
     }
 
-    // recursively goes through functionExpression and replaces all the variables
-    // bound
-    // to parameter with the argument
+    /* 
+     * Performs beta reduction by replacing occurrences of the variable (bound by a parameter)
+     * with the given argument in the function expression.
+     */
     private static Expression runApplication(ParameterVariable parameter, Expression functionExpression,
             Expression argument, Expression parent) {
 
@@ -119,6 +131,10 @@ public class Runner {
         }
     }
 
+    /* 
+     * Creates a deep copy of the expression while preserving the variable binding
+     * by tracking bound variables in the parameter list.
+     */
     private static Expression deepCopy(Expression expression, ArrayList<ParameterVariable> parameterList,
             Expression parent) {
 
@@ -157,6 +173,10 @@ public class Runner {
         }
     }
 
+    /* 
+     * Performs alpha reduction on the expression to rename bound variables,
+     * preventing variable capture by ensuring unique parameter names.
+     */
     private static void performAlphaReduction(Expression expression, ArrayList<ParameterVariable> parameterList) {
         switch (expression) {
             case FreeVariable fv:
@@ -195,6 +215,9 @@ public class Runner {
         }
     }
 
+    /* 
+     * Generates a new unique name for a parameter based on the existing names in the parameter list.
+     */
     private static String createNewParameterName(ArrayList<ParameterVariable> parameterList, ParameterVariable v) {
         String baseName = v.getName();
         String newName = baseName;
@@ -211,6 +234,10 @@ public class Runner {
         return newName;
     }
 
+    /* 
+     * Searches through memory entries to find an expression that is alpha-equivalent 
+     * to the provided expression. Returns the corresponding key if found.
+     */
     private static String findMatchingExpressionInMemory(Expression expression1) {
         for (var v : Memory.getEntries()) {
             if (isAlphaEquivalent(expression1, v.getValue(), new ArrayList<>(), new ArrayList<>())) {
@@ -220,6 +247,10 @@ public class Runner {
         return null;
     }
 
+    /* 
+     * Checks if the two expressions are alpha-equivalent by comparing their structure and 
+     * the context of bound variables.
+     */
     private static boolean isAlphaEquivalent(Expression e1, Expression e2, ArrayList<String> boundVars1, ArrayList<String> boundVars2) {
         if (e1 == null || e2 == null) return e1 == e2;
         if (e1.getClass() != e2.getClass()) return false;
@@ -242,28 +273,6 @@ public class Runner {
             && isAlphaEquivalent(a1.right, a2.right, boundVars1, boundVars2);
         } else {
             return false;
-        }
-    }
-
-    private static void printExpressionTree(Expression expression, String indent) {
-        if (expression instanceof FreeVariable) {
-            System.out.println(indent + "Free Variable: " + expression);
-        } else if (expression instanceof BoundVariable) {
-            System.out.println(indent + "Bound Variable: " + expression);
-        } else if (expression instanceof Function) {
-            Function f = (Function) expression;
-            System.out.println(indent + "Function: " + f.getParameter());
-            System.out.println(indent + "Bounded Parameters: " + f.getParameter().getBoundVariables());
-            printExpressionTree(f.getExpression(), indent + "  ");
-        } else if (expression instanceof Application) {
-            Application a = (Application) expression;
-            System.out.println(indent + "Application:");
-            System.out.println(indent + "  Left:");
-            printExpressionTree(a.left, indent + "    ");
-            System.out.println(indent + "  Right:");
-            printExpressionTree(a.right, indent + "    ");
-        } else {
-            System.out.println(indent + "Unknown Expression Type");
         }
     }
 }
