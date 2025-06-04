@@ -1,0 +1,3 @@
+Recieved Help From:
+- gltchitm (Thomas Raskin) : helped a lot with debugging, and a bit with some general code organization and design advice
+- chatgpt : used to help with code clarity and comments. Also helped with the function for creating new variable names during alpha reduction.
