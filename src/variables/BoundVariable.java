@@ -1,4 +1,6 @@
+//Zevi Cohen & Puhalenthi Ramesh Vidhya
 package src.variables;
+
 
 public class BoundVariable extends Variable {
     ParameterVariable parameter;
@@ -17,7 +19,7 @@ public class BoundVariable extends Variable {
         this.name = name;
     }
 
-    
+
     public String toString() {
         return "\u001B[31m" + this.name + "\u001B[0m";
     }

@@ -1,3 +1,4 @@
+//Zevi Cohen & Puhalenthi Ramesh Vidhya
 package src;
 
 import java.lang.reflect.Parameter;
@@ -9,7 +10,7 @@ import src.variables.ParameterVariable;
 import src.variables.Variable;
 
 public class Runner {
-    /* 
+    /*
      * Creates a deep copy of the given expression, runs it, performs alpha reduction,
      * and returns either the reduced expression or a free variable if a matching expression is found.
      */
@@ -17,13 +18,13 @@ public class Runner {
         expression = deepCopy(expression, new ArrayList<>(), null);
         Expression runExpression = run(expression);
         performAlphaReduction(runExpression, new ArrayList<>());
-        
+
         String matched = findMatchingExpressionInMemory(runExpression);
 
         return (matched == null) ? runExpression : new FreeVariable(matched);
     }
 
-    /* 
+    /*
      * Executes the expression by repeatedly performing function application (beta reduction)
      * until no further runnable application is found.
      */
@@ -74,7 +75,7 @@ public class Runner {
         return expression;
     }
 
-    /* 
+    /*
      * Recursively finds the leftmost function application that can be executed (runnable).
      * Returns the application if found, otherwise null.
      */
@@ -103,7 +104,7 @@ public class Runner {
         }
     }
 
-    /* 
+    /*
      * Performs beta reduction by replacing occurrences of the variable (bound by a parameter)
      * with the given argument in the function expression.
      */
@@ -131,7 +132,7 @@ public class Runner {
         }
     }
 
-    /* 
+    /*
      * Creates a deep copy of the expression while preserving the variable binding
      * by tracking bound variables in the parameter list.
      */
@@ -173,7 +174,7 @@ public class Runner {
         }
     }
 
-    /* 
+    /*
      * Performs alpha reduction on the expression to rename bound variables,
      * preventing variable capture by ensuring unique parameter names.
      */
@@ -215,7 +216,7 @@ public class Runner {
         }
     }
 
-    /* 
+    /*
      * Generates a new unique name for a parameter based on the existing names in the parameter list.
      */
     private static String createNewParameterName(ArrayList<ParameterVariable> parameterList, ParameterVariable v) {
@@ -234,8 +235,8 @@ public class Runner {
         return newName;
     }
 
-    /* 
-     * Searches through memory entries to find an expression that is alpha-equivalent 
+    /*
+     * Searches through memory entries to find an expression that is alpha-equivalent
      * to the provided expression. Returns the corresponding key if found.
      */
     private static String findMatchingExpressionInMemory(Expression expression1) {
@@ -247,8 +248,8 @@ public class Runner {
         return null;
     }
 
-    /* 
-     * Checks if the two expressions are alpha-equivalent by comparing their structure and 
+    /*
+     * Checks if the two expressions are alpha-equivalent by comparing their structure and
      * the context of bound variables.
      */
     private static boolean isAlphaEquivalent(Expression e1, Expression e2, ArrayList<String> boundVars1, ArrayList<String> boundVars2) {

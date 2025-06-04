@@ -1,3 +1,4 @@
+//Zevi Cohen & Puhalenthi Ramesh Vidhya
 package src;
 
 import src.variables.ParameterVariable;
@@ -24,7 +25,7 @@ public class Function implements Expression {
         expression = e;
     }
 
-    
+
     public String toString(){
         return "(λ" + parameter + "." + expression + ")";
     }
